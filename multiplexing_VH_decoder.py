@@ -369,7 +369,7 @@ def main():
         code=HGP_n100,
         num_multiplexing=num_multiplexing,
         assignment_type = assignment_type,
-        num_trials=100000,
+        num_trials=100,
         max_erasure_rate=0.5,
         min_erasure_rate=0.2,
         num_steps=30)
@@ -395,7 +395,7 @@ def main():
             code=HGP_n100,
             num_multiplexing=num_multiplexing,
             assignment_type = assignment_type,
-            num_trials=100000,
+            num_trials=100,
             max_erasure_rate=0.5,
             min_erasure_rate=0.2,
             num_steps=30)
