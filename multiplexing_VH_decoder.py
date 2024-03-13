@@ -1,10 +1,4 @@
 # -*- coding: utf-8 -*-
-"""
-Spyder Editor
-
-This is a temporary script file.
-"""
-
 import numpy as np
 import random
 import datetime
@@ -14,10 +8,7 @@ import json
 
 from Hypergraph_Product_Code_Construction_v3 import HGP_code, Toric3
 from peeling_cluster_decoder import combined_peeling_and_cluster_decoder
-from utilities import generate_erasure_pattern_index_set, generate_random_H_matrix, HGP_code, generate_random_error_index_set_with_erasure_support
-from utilities import index_to_biindex, biindex_to_index
-
-
+from utilities import generate_erasure_pattern_index_set, generate_random_H_matrix, HGP_code, generate_random_error_index_set_with_erasure_support, index_to_biindex, biindex_to_index
 
 def randomly_assign_qubits_to_photons(num_multiplexing,num_photons):
     num_qubits = num_multiplexing * num_photons
@@ -33,7 +24,6 @@ def randomly_assign_qubits_to_photons(num_multiplexing,num_photons):
         photons.append(qubits_in_photon)    
     return photons
 
-
 def deterministically_assign_qubits_to_photons(num_multiplexing,num_photons):
     num_qubits = num_multiplexing * num_photons
     qubits = [i for i in range(num_qubits)]
@@ -48,7 +38,6 @@ def deterministically_assign_qubits_to_photons(num_multiplexing,num_photons):
         photons.append(qubits_in_photon)    
     return photons
 
-
 def make_erasure_vec_from_ph(assignment, erasure_pattern):
     erased_qubits = []
     erasure_pattern = list(erasure_pattern)
@@ -56,7 +45,6 @@ def make_erasure_vec_from_ph(assignment, erasure_pattern):
     for index in erasure_pattern:
         erased_qubits  = erased_qubits + assignment[index]
     return erased_qubits
-
 
 def get_success_prob(HGP, assignment, num_trials, num_photons, erasure_rate):
     num_success = 0
@@ -115,8 +103,6 @@ def rate_and_error(results, num):
         error = agresti_coull_intetrval([num_success, num_fail])
         errors.append(error)
     return rates, errors
-
-
 
 
 # A function to partion the the qubits in a code into different photons of equal size.
@@ -335,27 +321,59 @@ def save_results(assignment_type,assignment,res,rate,error,code,num_multiplexing
 
 
 
-def main():
+# def main():
     
+#     H1_n100 = generate_random_H_matrix(total_bits=8,bit_node_deg=3,check_node_deg=4)
+#     H2_n100 = generate_random_H_matrix(total_bits=8,bit_node_deg=3,check_node_deg=4)
+#     HGP_n100 = HGP_code(H1_n100,H2_n100)
+    
+    
+#     num_multiplexing=2
+#     assignment_type=2
+#     dt_now = datetime.datetime.now()
+#     print(dt_now)
+    
+#     res,rate, error, assignment = run_decoder_with_assignment(
+#         code=HGP_n100,
+#         num_multiplexing=num_multiplexing,
+#         assignment_type = assignment_type,
+#         num_trials=10,
+#         max_erasure_rate=0.5,
+#         min_erasure_rate=0.2,
+#         num_steps=10)
+    
+#     save_results(
+#         assignment_type=assignment_type,
+#         assignment=assignment,
+#         res=res,rate=rate,
+#         error=error,
+#         code=HGP_n100,
+#         num_multiplexing=num_multiplexing)
+    
+#     dt_now = datetime.datetime.now()
+#     print(dt_now)
+
+def main():
+
     H1_n100 = generate_random_H_matrix(total_bits=8,bit_node_deg=3,check_node_deg=4)
     H2_n100 = generate_random_H_matrix(total_bits=8,bit_node_deg=3,check_node_deg=4)
     HGP_n100 = HGP_code(H1_n100,H2_n100)
-    
-    
-    num_multiplexing=2
-    assignment_type=2
+
+    # QM = 1
+    num_multiplexing = 1
+    assignment_type = 0
     dt_now = datetime.datetime.now()
     print(dt_now)
-    
+
     res,rate, error, assignment = run_decoder_with_assignment(
         code=HGP_n100,
         num_multiplexing=num_multiplexing,
         assignment_type = assignment_type,
-        num_trials=10,
+        num_trials=100000,
         max_erasure_rate=0.5,
         min_erasure_rate=0.2,
-        num_steps=10)
-    
+        num_steps=30)
+
     save_results(
         assignment_type=assignment_type,
         assignment=assignment,
@@ -363,12 +381,34 @@ def main():
         error=error,
         code=HGP_n100,
         num_multiplexing=num_multiplexing)
-    
+
+    print('QM=1 finished')
     dt_now = datetime.datetime.now()
     print(dt_now)
-    
-    
+
+    num_multiplexing=2
+
+    for i in [0,1,2]:
+        assignment_type = i
+
+        res,rate, error, assignment = run_decoder_with_assignment(
+            code=HGP_n100,
+            num_multiplexing=num_multiplexing,
+            assignment_type = assignment_type,
+            num_trials=100000,
+            max_erasure_rate=0.5,
+            min_erasure_rate=0.2,
+            num_steps=30)
+
+        save_results(
+            assignment_type=assignment_type,
+            assignment=assignment,
+            res=res,rate=rate,
+            error=error,
+            code=HGP_n100,
+            num_multiplexing=num_multiplexing)
+        print('QM=2 with assignment' + str(i) + 'finished')
+        dt_now = datetime.datetime.now()
+        print(dt_now)
 
 main()
-
-
