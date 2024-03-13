@@ -271,27 +271,32 @@ def run_decoder_with_assignment(
     return res,rate, error, assignment
  
 
-def save_results(assignment_type,assignment,res,rate,error,code,num_multiplexing):
+def save_results(assignment_type,assignment,res,rate,error,code,num_multiplexing,max_erasure_rate,min_erasure_rate,num_steps,num_trials):
     
     num_photons = code.num_qubits//num_multiplexing
-    dt_now = datetime.datetime.now()
-
+    dt_now = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
+    step_size = (max_erasure_rate-min_erasure_rate)/num_steps
     # Data to be written
     results_dictionary = {
         "Code_length": code.num_qubits,
         "Code_dimension": code.dim,
-        "HGP.Hx": code.Hx.tolist(),
-        "HGP.Hz": code.Hx.tolist(),
-        "H1": code.H1.tolist(),
-        "H2": code.H2.tolist(),
         "assignment type": assignment_type,
-        "assignment": assignment,
+        "max_erasure_rate": max_erasure_rate,
+        "min_erasure_rate": min_erasure_rate,
+        "num_steps": num_steps,
+        "stepsize" : step_size, 
+        "num_multiplexing": num_multiplexing,
+        "num_photons": num_photons,
+        "num_trials": num_trials,
         "res": res,
         "rate": rate,
         "error": error,
-        "num_multiplexing": num_multiplexing,
-        "num_photons": num_photons,
-        "time":str(dt_now)
+        "time": dt_now,
+        "assignment": assignment,
+        "HGP.Hx": code.Hx.tolist(),
+        "HGP.Hz": code.Hx.tolist(),
+        "H1": code.H1.tolist(),
+        "H2": code.H2.tolist()
     }
 
  
@@ -299,7 +304,7 @@ def save_results(assignment_type,assignment,res,rate,error,code,num_multiplexing
     json_object = json.dumps(results_dictionary, indent=4)
     
     
-    file_name_base = "results_HGP_" +str(code.num_qubits)
+    file_name_base = "results_HGP_n"+str(code.num_qubits)+"_m="+str(num_multiplexing)+"_rate"+str(rate[0])+"-"+str(rate[-1])+"_time"+str(dt_now)
     
     if assignment_type == 0:
         # deterministic, it can also be used for the case without multiplexing
@@ -362,17 +367,23 @@ def main():
     # QM = 1
     num_multiplexing = 1
     assignment_type = 0
+    num_trials=10
+    max_erasure_rate = 0.5
+    min_erasure_rate=0.2
+    num_steps=30
+    
     dt_now = datetime.datetime.now()
     print(dt_now)
-
+    
+    
     res,rate, error, assignment = run_decoder_with_assignment(
         code=HGP_n100,
         num_multiplexing=num_multiplexing,
         assignment_type = assignment_type,
-        num_trials=100,
-        max_erasure_rate=0.5,
-        min_erasure_rate=0.2,
-        num_steps=30)
+        num_trials=num_trials,
+        max_erasure_rate=max_erasure_rate,
+        min_erasure_rate=min_erasure_rate,
+        num_steps=num_steps)
 
     save_results(
         assignment_type=assignment_type,
@@ -380,7 +391,12 @@ def main():
         res=res,rate=rate,
         error=error,
         code=HGP_n100,
-        num_multiplexing=num_multiplexing)
+        num_multiplexing=num_multiplexing,
+        max_erasure_rate=max_erasure_rate,
+        min_erasure_rate=min_erasure_rate,
+        num_steps=num_steps,
+        num_trials=num_trials
+        )
 
     print('QM=1 finished')
     dt_now = datetime.datetime.now()
@@ -395,10 +411,10 @@ def main():
             code=HGP_n100,
             num_multiplexing=num_multiplexing,
             assignment_type = assignment_type,
-            num_trials=100,
-            max_erasure_rate=0.5,
-            min_erasure_rate=0.2,
-            num_steps=30)
+            num_trials=num_trials,
+            max_erasure_rate=max_erasure_rate,
+            min_erasure_rate=min_erasure_rate,
+            num_steps=num_steps)
 
         save_results(
             assignment_type=assignment_type,
@@ -406,7 +422,12 @@ def main():
             res=res,rate=rate,
             error=error,
             code=HGP_n100,
-            num_multiplexing=num_multiplexing)
+            num_multiplexing=num_multiplexing,
+            max_erasure_rate=max_erasure_rate,
+            min_erasure_rate=min_erasure_rate,
+            num_steps=num_steps,
+            num_trials=num_trials
+            )
         print('QM=2 with assignment' + str(i) + 'finished')
         dt_now = datetime.datetime.now()
         print(dt_now)
