@@ -367,10 +367,10 @@ def main():
     # QM = 1
     num_multiplexing = 1
     assignment_type = 0
-    num_trials=10
-    max_erasure_rate = 0.5
+    num_trials=1000
+    max_erasure_rate=0.55
     min_erasure_rate=0.2
-    num_steps=30
+    num_steps=35
     
     dt_now = datetime.datetime.now()
     print(dt_now)
