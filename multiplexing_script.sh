@@ -1,5 +1,6 @@
 #!/bin/bash
-#SBATCH -p short                     # short partition
+#SBATCH -p compute
+#SBATCH --time=15:00:00
 #SBATCH --mem=10G
 #SBATCH --job-name=multiplexing      # Job name\
 #SBATCH -c 1                    # Run all processes on a single node\
