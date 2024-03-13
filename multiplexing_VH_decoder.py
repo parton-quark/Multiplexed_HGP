@@ -303,8 +303,8 @@ def save_results(assignment_type,assignment,res,rate,error,code,num_multiplexing
     # Serializing json
     json_object = json.dumps(results_dictionary, indent=4)
     
-    
-    file_name_base = "results_HGP_n"+str(code.num_qubits)+"_m="+str(num_multiplexing)+"_rate"+str(rate[0])+"-"+str(rate[-1])+"_time"+str(dt_now)
+    folder_name = "results/"
+    file_name_base = folder_name+"results_HGP_n"+str(code.num_qubits)+"_m="+str(num_multiplexing)+"_rate"+str(rate[0])+"-"+str(rate[-1])+"_time"+str(dt_now)
     
     if assignment_type == 0:
         # deterministic, it can also be used for the case without multiplexing
@@ -367,7 +367,7 @@ def main():
     # QM = 1
     num_multiplexing = 1
     assignment_type = 0
-    num_trials=1000
+    num_trials=10000
     max_erasure_rate=0.55
     min_erasure_rate=0.2
     num_steps=35
@@ -401,35 +401,39 @@ def main():
     print('QM=1 finished')
     dt_now = datetime.datetime.now()
     print(dt_now)
+    
+    
 
-    num_multiplexing=2
+    #num_multiplexing=2
+    
+    for num_multiplexing in [2,5,10]:
 
-    for i in [0,1,2]:
-        assignment_type = i
-
-        res,rate, error, assignment = run_decoder_with_assignment(
-            code=HGP_n100,
-            num_multiplexing=num_multiplexing,
-            assignment_type = assignment_type,
-            num_trials=num_trials,
-            max_erasure_rate=max_erasure_rate,
-            min_erasure_rate=min_erasure_rate,
-            num_steps=num_steps)
-
-        save_results(
-            assignment_type=assignment_type,
-            assignment=assignment,
-            res=res,rate=rate,
-            error=error,
-            code=HGP_n100,
-            num_multiplexing=num_multiplexing,
-            max_erasure_rate=max_erasure_rate,
-            min_erasure_rate=min_erasure_rate,
-            num_steps=num_steps,
-            num_trials=num_trials
-            )
-        print('QM=2 with assignment' + str(i) + 'finished')
-        dt_now = datetime.datetime.now()
-        print(dt_now)
+        for i in [0,1,2]:
+            assignment_type = i
+    
+            res,rate, error, assignment = run_decoder_with_assignment(
+                code=HGP_n100,
+                num_multiplexing=num_multiplexing,
+                assignment_type = assignment_type,
+                num_trials=num_trials,
+                max_erasure_rate=max_erasure_rate,
+                min_erasure_rate=min_erasure_rate,
+                num_steps=num_steps)
+    
+            save_results(
+                assignment_type=assignment_type,
+                assignment=assignment,
+                res=res,rate=rate,
+                error=error,
+                code=HGP_n100,
+                num_multiplexing=num_multiplexing,
+                max_erasure_rate=max_erasure_rate,
+                min_erasure_rate=min_erasure_rate,
+                num_steps=num_steps,
+                num_trials=num_trials
+                )
+            print('QM=2 with assignment' + str(i) + 'finished')
+            dt_now = datetime.datetime.now()
+            print(dt_now)
 
 main()
