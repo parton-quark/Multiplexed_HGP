@@ -561,8 +561,10 @@ def main_without_LE():
         
 def main_with_LE():
     # inputs
-    # args = sys.argv
-    num_multiplexing=int(sys.argv[0])
+    print('inputs:')
+    print(sys.argv)
+
+    num_multiplexing=sys.argv[0]
     num_multiplexing = int(sys.argv[1])
     assignment_type = int(sys.argv[2])
     num_trials=int(sys.argv[3])
@@ -573,21 +575,12 @@ def main_with_LE():
     bit_node_deg=int(sys.argv[8])
     check_node_deg=int(sys.argv[9])
     assignment_type=int(sys.argv[10])
-    
+    print('make HGP code')
     # generate HGP code
     H1 = generate_random_H_matrix(total_bits=total_bits,bit_node_deg=bit_node_deg,check_node_deg=check_node_deg)
     H2 = generate_random_H_matrix(total_bits=total_bits,bit_node_deg=bit_node_deg,check_node_deg=check_node_deg)
     HGP = HGP_code(H1,H2)
     code = HGP
-    
-    # num_multiplexing=1
-    # num_multiplexing = 1
-    # assignment_type = 0
-    # num_trials=100
-    # max_erasure_rate=0.55
-    # min_erasure_rate=0.00
-    # num_steps=55
-    # code = HGP
     
     dt_now = datetime.datetime.now()
     print('start simulation')
