@@ -564,13 +564,13 @@ def main_with_LE():
     H2 = generate_random_H_matrix(total_bits=16,bit_node_deg=2,check_node_deg=4)
     HGP = HGP_code(H1,H2)
     
-    #num_multiplexing=1
+    # num_multiplexing=1
     num_multiplexing = 1
     assignment_type = 0
-    num_trials=1
-    max_erasure_rate=0.10
+    num_trials=100
+    max_erasure_rate=0.55
     min_erasure_rate=0.00
-    num_steps=10
+    num_steps=55
     code = HGP
     
     dt_now = datetime.datetime.now()
@@ -647,3 +647,4 @@ def main_with_LE():
             
             
 # main()
+main_with_LE()
