@@ -5,6 +5,7 @@ import datetime
 import matplotlib.pyplot as plt
 from itertools import chain, combinations
 import json 
+import sys
 
 from Hypergraph_Product_Code_Construction_v3 import HGP_code, Toric3
 from peeling_cluster_decoder import combined_peeling_and_cluster_decoder
@@ -559,19 +560,35 @@ def main_without_LE():
         
         
 def main_with_LE():
+    # inputs
+    args = sys.argv
+    
+    num_multiplexing=args[0]
+    num_multiplexing = args[1]
+    assignment_type = args[2]
+    num_trials=args[3]
+    max_erasure_rate=args[4]
+    min_erasure_rate=args[5]
+    num_steps=args[6]
+    total_bits=args[7]
+    bit_node_deg=args[8]
+    check_node_deg=args[9]
+    assignment_type=args[10]
+    
     # [[320]]
-    H1 = generate_random_H_matrix(total_bits=16,bit_node_deg=2,check_node_deg=4)
-    H2 = generate_random_H_matrix(total_bits=16,bit_node_deg=2,check_node_deg=4)
+    H1 = generate_random_H_matrix(total_bits=total_bits,bit_node_deg=bit_node_deg,check_node_deg=check_node_deg)
+    H2 = generate_random_H_matrix(total_bits=total_bits,bit_node_deg=bit_node_deg,check_node_deg=check_node_deg)
     HGP = HGP_code(H1,H2)
+    code = HGP
     
     # num_multiplexing=1
-    num_multiplexing = 1
-    assignment_type = 0
-    num_trials=100
-    max_erasure_rate=0.55
-    min_erasure_rate=0.00
-    num_steps=55
-    code = HGP
+    # num_multiplexing = 1
+    # assignment_type = 0
+    # num_trials=100
+    # max_erasure_rate=0.55
+    # min_erasure_rate=0.00
+    # num_steps=55
+    # code = HGP
     
     dt_now = datetime.datetime.now()
     print('start simulation')
@@ -609,40 +626,40 @@ def main_with_LE():
     print(dt_now)
 
     #num_multiplexing=2
-    ms = [2,4,8,16]
-    for num_multiplexing in ms:
-        for i in [0,1,2]:
-            assignment_type = i
+#     ms = [2,4,8,16]
+#     for num_multiplexing in ms:
+#         for i in [0,1,2]:
+#             assignment_type = i
     
-            res, rates, errors, assignment, DFrates, DFerrors, nonDFLErates, nonDFLEerrors = run_decoder_with_assignment_with_DFLE(
-                code=code,
-                num_multiplexing=num_multiplexing,
-                assignment_type = assignment_type,
-                num_trials=num_trials,
-                max_erasure_rate=max_erasure_rate,
-                min_erasure_rate=min_erasure_rate,
-                num_steps=num_steps)
+#             res, rates, errors, assignment, DFrates, DFerrors, nonDFLErates, nonDFLEerrors = run_decoder_with_assignment_with_DFLE(
+#                 code=code,
+#                 num_multiplexing=num_multiplexing,
+#                 assignment_type = assignment_type,
+#                 num_trials=num_trials,
+#                 max_erasure_rate=max_erasure_rate,
+#                 min_erasure_rate=min_erasure_rate,
+#                 num_steps=num_steps)
     
-            save_results_with_DFLE(
-                assignment_type=assignment_type,
-                assignment=assignment,
-                res=res,
-                rate=rates,
-                error=errors,
-                DFrates=DFrates,
-                DFerrors=DFerrors,
-                nonDFLErates=nonDFLErates,
-                nonDFLEerrors=nonDFLEerrors,
-                code=code,
-                num_multiplexing=num_multiplexing,
-                max_erasure_rate=max_erasure_rate,
-                min_erasure_rate=min_erasure_rate,
-                num_steps=num_steps,
-                num_trials=num_trials
-            )
-            print('m=' + str(num_multiplexing) + ' with assignment' + str(i) + 'finished')
-            dt_now = datetime.datetime.now()
-            print(dt_now)
+#             save_results_with_DFLE(
+#                 assignment_type=assignment_type,
+#                 assignment=assignment,
+#                 res=res,
+#                 rate=rates,
+#                 error=errors,
+#                 DFrates=DFrates,
+#                 DFerrors=DFerrors,
+#                 nonDFLErates=nonDFLErates,
+#                 nonDFLEerrors=nonDFLEerrors,
+#                 code=code,
+#                 num_multiplexing=num_multiplexing,
+#                 max_erasure_rate=max_erasure_rate,
+#                 min_erasure_rate=min_erasure_rate,
+#                 num_steps=num_steps,
+#                 num_trials=num_trials
+#             )
+#             print('m=' + str(num_multiplexing) + ' with assignment' + str(i) + 'finished')
+#             dt_now = datetime.datetime.now()
+#             print(dt_now)
     return 0
             
             
