@@ -561,21 +561,20 @@ def main_without_LE():
         
 def main_with_LE():
     # inputs
-    args = sys.argv
+    # args = sys.argv
+    num_multiplexing=int(sys.argv[0])
+    num_multiplexing = int(sys.argv[1])
+    assignment_type = int(sys.argv[2])
+    num_trials=int(sys.argv[3])
+    max_erasure_rate=float(sys.argv[4])
+    min_erasure_rate=float(sys.argv[5])
+    num_steps=float(sys.argv[6])
+    total_bits=int(sys.argv[7])
+    bit_node_deg=int(sys.argv[8])
+    check_node_deg=int(sys.argv[9])
+    assignment_type=int(sys.argv[10])
     
-    num_multiplexing=args[0]
-    num_multiplexing = args[1]
-    assignment_type = args[2]
-    num_trials=args[3]
-    max_erasure_rate=args[4]
-    min_erasure_rate=args[5]
-    num_steps=args[6]
-    total_bits=args[7]
-    bit_node_deg=args[8]
-    check_node_deg=args[9]
-    assignment_type=args[10]
-    
-    # [[320]]
+    # generate HGP code
     H1 = generate_random_H_matrix(total_bits=total_bits,bit_node_deg=bit_node_deg,check_node_deg=check_node_deg)
     H2 = generate_random_H_matrix(total_bits=total_bits,bit_node_deg=bit_node_deg,check_node_deg=check_node_deg)
     HGP = HGP_code(H1,H2)
@@ -621,7 +620,7 @@ def main_with_LE():
         num_trials=num_trials
     )
 
-    print('m=1 finished')
+    print('finished')
     dt_now = datetime.datetime.now()
     print(dt_now)
 
