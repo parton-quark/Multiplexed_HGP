@@ -454,7 +454,7 @@ def save_results_with_DFLE(assignment_type,assignment,res,rate,error,DFrates, DF
     json_object = json.dumps(results_dictionary, indent=4)
     
     folder_name = "results/"
-    file_name_base = folder_name+"results_HGP_n"+str(code.num_qubits)+"_m="+str(num_multiplexing)+"_rate"+str(rate[0])+"-"+str(rate[-1])+"_time"+str(dt_now)
+    file_name_base = folder_name+"results_HGP_n"+str(code.num_qubits)+"_m="+str(num_multiplexing)+"_rate"+str(rate[0])+"-"+str(rate[-1]) # +"_time"+str(dt_now)
     
     if assignment_type == 0:
         # deterministic, it can also be used for the case without multiplexing
@@ -558,23 +558,61 @@ def main_without_LE():
 # H2_n100 = generate_random_H_matrix(total_bits=8,bit_node_deg=3,check_node_deg=4)
 # HGP_n100 = HGP_code(H1_n100,H2_n100)
         
+
+    #num_multiplexing=2
+#     ms = [2,4,8,16]
+#     for num_multiplexing in ms:
+#         for i in [0,1,2]:
+#             assignment_type = i
+    
+#             res, rates, errors, assignment, DFrates, DFerrors, nonDFLErates, nonDFLEerrors = run_decoder_with_assignment_with_DFLE(
+#                 code=code,
+#                 num_multiplexing=num_multiplexing,
+#                 assignment_type = assignment_type,
+#                 num_trials=num_trials,
+#                 max_erasure_rate=max_erasure_rate,
+#                 min_erasure_rate=min_erasure_rate,
+#                 num_steps=num_steps)
+    
+#             save_results_with_DFLE(
+#                 assignment_type=assignment_type,
+#                 assignment=assignment,
+#                 res=res,
+#                 rate=rates,
+#                 error=errors,
+#                 DFrates=DFrates,
+#                 DFerrors=DFerrors,
+#                 nonDFLErates=nonDFLErates,
+#                 nonDFLEerrors=nonDFLEerrors,
+#                 code=code,
+#                 num_multiplexing=num_multiplexing,
+#                 max_erasure_rate=max_erasure_rate,
+#                 min_erasure_rate=min_erasure_rate,
+#                 num_steps=num_steps,
+#                 num_trials=num_trials
+#             )
+#             print('m=' + str(num_multiplexing) + ' with assignment' + str(i) + 'finished')
+#             dt_now = datetime.datetime.now()
+#             print(dt_now)
+    
         
 def main_with_LE():
     # inputs
+    
     print('inputs:')
     print(sys.argv)
-
-    num_multiplexing=sys.argv[0]
-    num_multiplexing = int(sys.argv[1])
-    assignment_type = int(sys.argv[2])
-    num_trials=int(sys.argv[3])
-    max_erasure_rate=float(sys.argv[4])
-    min_erasure_rate=float(sys.argv[5])
-    num_steps=float(sys.argv[6])
-    total_bits=int(sys.argv[7])
-    bit_node_deg=int(sys.argv[8])
-    check_node_deg=int(sys.argv[9])
-    assignment_type=int(sys.argv[10])
+    # sys.argv[0] is the file name
+    
+    num_multiplexing=int(sys.argv[1])
+    # assignment_type = int(sys.argv[2])
+    num_trials=int(sys.argv[4])
+    max_erasure_rate=float(sys.argv[5])
+    min_erasure_rate=float(sys.argv[6])
+    num_steps=int(sys.argv[7])
+    total_bits=int(sys.argv[8])
+    bit_node_deg=int(sys.argv[9])
+    check_node_deg=int(sys.argv[10])
+    assignment_type=int(sys.argv[11])
     print('make HGP code')
     # generate HGP code
     H1 = generate_random_H_matrix(total_bits=total_bits,bit_node_deg=bit_node_deg,check_node_deg=check_node_deg)
@@ -616,42 +654,6 @@ def main_with_LE():
     print('finished')
     dt_now = datetime.datetime.now()
     print(dt_now)
-
-    #num_multiplexing=2
-#     ms = [2,4,8,16]
-#     for num_multiplexing in ms:
-#         for i in [0,1,2]:
-#             assignment_type = i
-    
-#             res, rates, errors, assignment, DFrates, DFerrors, nonDFLErates, nonDFLEerrors = run_decoder_with_assignment_with_DFLE(
-#                 code=code,
-#                 num_multiplexing=num_multiplexing,
-#                 assignment_type = assignment_type,
-#                 num_trials=num_trials,
-#                 max_erasure_rate=max_erasure_rate,
-#                 min_erasure_rate=min_erasure_rate,
-#                 num_steps=num_steps)
-    
-#             save_results_with_DFLE(
-#                 assignment_type=assignment_type,
-#                 assignment=assignment,
-#                 res=res,
-#                 rate=rates,
-#                 error=errors,
-#                 DFrates=DFrates,
-#                 DFerrors=DFerrors,
-#                 nonDFLErates=nonDFLErates,
-#                 nonDFLEerrors=nonDFLEerrors,
-#                 code=code,
-#                 num_multiplexing=num_multiplexing,
-#                 max_erasure_rate=max_erasure_rate,
-#                 min_erasure_rate=min_erasure_rate,
-#                 num_steps=num_steps,
-#                 num_trials=num_trials
-#             )
-#             print('m=' + str(num_multiplexing) + ' with assignment' + str(i) + 'finished')
-#             dt_now = datetime.datetime.now()
-#             print(dt_now)
     return 0
             
             
