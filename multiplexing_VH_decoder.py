@@ -391,7 +391,7 @@ def save_results(assignment_type,assignment,res,rate,error,code,num_multiplexing
         "res": res,
         "rate": rate,
         "error": error,
-        "time": dt_now,
+        "timestamp": dt_now,
         "assignment": assignment,
         "HGP.Hx": code.Hx.tolist(),
         "HGP.Hz": code.Hx.tolist(),
@@ -424,7 +424,7 @@ def save_results(assignment_type,assignment,res,rate,error,code,num_multiplexing
         
     return results_dictionary
 
-def save_results_with_DFLE(assignment_type,assignment,res,rate,error,DFrates, DFerrors, nonDFLErates, nonDFLEerrors,code,num_multiplexing,max_erasure_rate,min_erasure_rate,num_steps,num_trials,erasure_rates):
+def save_results_with_DFLE(assignment_type,assignment,res,rate,error,DFrates, DFerrors, nonDFLErates, nonDFLEerrors,code,num_multiplexing,max_erasure_rate,min_erasure_rate,num_steps,num_trials,erasure_rates,dt_start, dt_finished):
     
     num_photons = code.num_qubits//num_multiplexing
     dt_now = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
@@ -451,6 +451,9 @@ def save_results_with_DFLE(assignment_type,assignment,res,rate,error,DFrates, DF
         "num_multiplexing": num_multiplexing,
         "num_photons": num_photons,
         "num_trials": num_trials,
+        "dt_start": dt_start, 
+        "dt_finished": dt_finished,
+        "dt_now": dt_now,
         "erasure_rates": erasure_rates,
         "results": res,
         "success_rate": rate,
@@ -485,12 +488,14 @@ def save_results_with_DFLE(assignment_type,assignment,res,rate,error,DFrates, DF
         file_name = file_name_base+"_row_col_assignment"
     else:
         print("invalid assignment")
-    # Writing to sample.json
+    # Writing to json file
     
-    with open(file_name+".json", "w") as outfile:
+    file_name = file_name + ".json"
+    
+    with open(file_name, "w") as outfile:
         outfile.write(json_object)
         
-    return results_dictionary
+    return results_dictionary, file_name
 
 def main_without_LE():
 
@@ -595,9 +600,10 @@ def main_with_LE():
     HGP = HGP_code(H1,H2)
     code = HGP
     
-    dt_now = datetime.datetime.now()
+    dt_start = datetime.datetime.now()
     print('start simulation')
-    print(dt_now)
+    print(dt_start)
+    dt_start = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
     
     res, rates, errors, assignment, DFrates, DFerrors, nonDFLErates, nonDFLEerrors, erasure_rates = run_decoder_with_assignment_with_DFLE(
         code=code,
@@ -608,7 +614,12 @@ def main_with_LE():
         min_erasure_rate=min_erasure_rate,
         num_steps=num_steps)
     
-    save_results_with_DFLE(
+    print('simulation finished')
+    dt_finished = datetime.datetime.now()
+    print(dt_finished)
+    dt_finished = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
+    
+    save = save_results_with_DFLE(
         assignment_type=assignment_type,
         assignment=assignment,
         res=res,
@@ -624,12 +635,11 @@ def main_with_LE():
         min_erasure_rate=min_erasure_rate,
         num_steps=num_steps,
         num_trials=num_trials,
-        erasure_rates=erasure_rates
+        erasure_rates=erasure_rates,
+        dt_start=dt_start,
+        dt_finished=dt_finished
     )
-
-    print('finished')
-    dt_now = datetime.datetime.now()
-    print(dt_now)
+    print('saved the results to ' + save[1])
     return 0
 
 # main()
