@@ -58,7 +58,7 @@ def get_success_prob(HGP, assignment, num_trials, num_photons, erasure_rate):
             erasure_on_qubits = make_erasure_vec_from_ph(assignment = assignment, erasure_pattern = errors_on_photons)
             # print('erasure_on_qubits:')
             # print(erasure_on_qubits)
-            random_pauli = generate_random_error_index_set_with_erasure_support(HGP.num_qubits, erasure_index_set = set(erasure_on_qubits),error_rate = erasure_rate)
+            random_pauli = generate_random_error_index_set_with_erasure_support(HGP.num_qubits, erasure_index_set = set(erasure_on_qubits),error_rate = 0.5)
             # print('random_pauli:')
             # print(random_pauli)
             syndrome = HGP.Hz_syn_index_set_for_X_err(random_pauli)
@@ -90,7 +90,7 @@ def get_DF_and_LE_and_failure_prob(HGP, assignment, num_trials, num_photons, era
             erasure_on_qubits = make_erasure_vec_from_ph(assignment = assignment, erasure_pattern = errors_on_photons)
             # print('erasure_on_qubits:')
             # print(erasure_on_qubits)
-            random_pauli = generate_random_error_index_set_with_erasure_support(HGP.num_qubits, erasure_index_set = set(erasure_on_qubits),error_rate = erasure_rate)
+            random_pauli = generate_random_error_index_set_with_erasure_support(HGP.num_qubits, erasure_index_set = set(erasure_on_qubits),error_rate = 0.5)
             # print('random_pauli:')
             # print(random_pauli)
             syndrome = HGP.Hz_syn_index_set_for_X_err(random_pauli)
@@ -468,7 +468,7 @@ def save_results_with_DFLE(assignment_type,assignment,res,rate,error,DFrates, DF
     json_object = json.dumps(results_dictionary, indent=4)
     
     folder_name = "results/"
-    file_name_base = folder_name+"results_HGP_n"+str(code.num_qubits)+"_m="+str(num_multiplexing)+"_rate"+str(min_erasure_rate)+"-"+str(max_erasure_rate) # +"_time"+str(dt_now)
+    file_name_base = folder_name + "results_HGP_n" + str(code.num_qubits) + "_m="+str(num_multiplexing) + "_rate=" + str(min_erasure_rate)+"-"+str(max_erasure_rate) # +"_time"+str(dt_now)
     
     if assignment_type == 0:
         # deterministic, it can also be used for the case without multiplexing
