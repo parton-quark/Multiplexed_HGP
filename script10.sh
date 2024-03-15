@@ -7,4 +7,4 @@
 #SBATCH --ntasks=1                   # Run a single task\
 #SBATCH --output=multiplexing_output_test.txt  # Standard output and error log\
 
-python multiplexing_VH_decoder.py 8 1 0 10000 0.55 0.00 55 16 2 4 2
+python multiplexing_VH_decoder.py 8 1 0 10000 1.00 0.00 100 16 2 4 2
