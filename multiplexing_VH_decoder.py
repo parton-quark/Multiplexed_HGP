@@ -63,8 +63,10 @@ def get_success_prob(HGP, assignment, num_trials, num_photons, erasure_rate):
             # print(random_pauli)
             syndrome = HGP.Hz_syn_index_set_for_X_err(random_pauli)
             result = combined_peeling_and_cluster_decoder(HGP_code=HGP,E_index_set_input=set(erasure_on_qubits),s_index_set_input=syndrome)
-
-            if HGP.is_non_trivial_X_logical_error_index_set(result[0]) == False:
+            
+            errors_after_correction = random_pauli.symmetric_difference(result[0])
+            
+            if HGP.is_non_trivial_X_logical_error_index_set(errors_after_correction) == False:
                 num_success += 1
             else:
                 num_failure += 1
@@ -95,8 +97,10 @@ def get_DF_and_LE_and_failure_prob(HGP, assignment, num_trials, num_photons, era
             # print(random_pauli)
             syndrome = HGP.Hz_syn_index_set_for_X_err(random_pauli)
             result = combined_peeling_and_cluster_decoder(HGP_code=HGP,E_index_set_input=set(erasure_on_qubits),s_index_set_input=syndrome)
-
-            if HGP.is_non_trivial_X_logical_error_index_set(result[0]) == False:
+            
+            errors_after_correction = random_pauli.symmetric_difference(result[0])
+            
+            if HGP.is_non_trivial_X_logical_error_index_set(errors_after_correction) == False:
                 num_success += 1
             else:
                 # logical error
