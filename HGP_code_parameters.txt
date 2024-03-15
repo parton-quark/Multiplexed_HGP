@@ -1,0 +1,4 @@
+# [[100,4]]
+# H1_n100 = generate_random_H_matrix(total_bits=8,bit_node_deg=3,check_node_deg=4)
+# H2_n100 = generate_random_H_matrix(total_bits=8,bit_node_deg=3,check_node_deg=4)
+# HGP_n100 = HGP_code(H1_n100,H2_n100)
