@@ -159,7 +159,9 @@ def success_DF_nonDFLE_rate_and_error_bar(results, num):
         rate = num_fail / (num_success + num_fail)
         rates.append(rate)
         DFrate = num_DF / (num_success + num_fail)
+        DFrates.append(DFrate)
         nonDFLErate = num_nonDFLE / (num_success + num_fail)
+        nonDFLErates.append(nonDFLErate)
         
         error = agresti_coull_intetrval([num_success, num_fail])
         errors.append(error)
@@ -362,7 +364,7 @@ def run_decoder_with_assignment_with_DFLE(
         res.append(res_trials)
         
     rates, errors, DFrates, DFerrors, nonDFLErates, nonDFLEerrors = success_DF_nonDFLE_rate_and_error_bar(res, num_steps) 
-    return res, rates, errors, assignment, DFrates, DFerrors, nonDFLErates, nonDFLEerrors
+    return res, rates, errors, assignment, DFrates, DFerrors, nonDFLErates, nonDFLEerrors, erasure_rates
 
 def save_results(assignment_type,assignment,res,rate,error,code,num_multiplexing,max_erasure_rate,min_erasure_rate,num_steps,num_trials):
     
@@ -381,6 +383,7 @@ def save_results(assignment_type,assignment,res,rate,error,code,num_multiplexing
         "num_multiplexing": num_multiplexing,
         "num_photons": num_photons,
         "num_trials": num_trials,
+        "time": dt_now,
         "res": res,
         "rate": rate,
         "error": error,
@@ -417,12 +420,22 @@ def save_results(assignment_type,assignment,res,rate,error,code,num_multiplexing
         
     return results_dictionary
 
-def save_results_with_DFLE(assignment_type,assignment,res,rate,error,DFrates, DFerrors, nonDFLErates, nonDFLEerrors,code,num_multiplexing,max_erasure_rate,min_erasure_rate,num_steps,num_trials):
+def save_results_with_DFLE(assignment_type,assignment,res,rate,error,DFrates, DFerrors, nonDFLErates, nonDFLEerrors,code,num_multiplexing,max_erasure_rate,min_erasure_rate,num_steps,num_trials,erasure_rates):
     
     num_photons = code.num_qubits//num_multiplexing
     dt_now = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
     step_size = (max_erasure_rate-min_erasure_rate)/num_steps
     # Data to be written
+    
+    failure_reasonlist = []
+    num_DFlist = []
+    num_nonDFLElist = []
+    
+    for i in res:
+        num_DFlist.append(i[2])
+        num_nonDFLElist.append(i[3])
+        failure_reasonlist.append((i[2],i[3]))
+        
     results_dictionary = {
         "Code_length": code.num_qubits,
         "Code_dimension": code.dim,
@@ -434,15 +447,16 @@ def save_results_with_DFLE(assignment_type,assignment,res,rate,error,DFrates, DF
         "num_multiplexing": num_multiplexing,
         "num_photons": num_photons,
         "num_trials": num_trials,
-        "res": res,
-        "rate": rate,
-        "error": error,
-        "num_DF":res[2],
-        "num_nonDFLE": res[3],
+        "erasure_rates": erasure_rates,
+        "results": res,
+        "success_rate": rate,
+        "error_bar_for_success_rate": error,
+        "failure_reason":failure_reasonlist,
+        "num_DF":num_DFlist,
+        "num_nonDFLE": num_nonDFLElist,
         "DFrate": DFrates,
         "DFerrors": DFerrors,
         "nonDFLErate": nonDFLErates,
-        "time": dt_now,
         "assignment": assignment,
         "HGP.Hx": code.Hx.tolist(),
         "HGP.Hz": code.Hx.tolist(),
@@ -454,7 +468,7 @@ def save_results_with_DFLE(assignment_type,assignment,res,rate,error,DFrates, DF
     json_object = json.dumps(results_dictionary, indent=4)
     
     folder_name = "results/"
-    file_name_base = folder_name+"results_HGP_n"+str(code.num_qubits)+"_m="+str(num_multiplexing)+"_rate"+str(rate[0])+"-"+str(rate[-1]) # +"_time"+str(dt_now)
+    file_name_base = folder_name+"results_HGP_n"+str(code.num_qubits)+"_m="+str(num_multiplexing)+"_rate"+str(min_erasure_rate)+"-"+str(max_erasure_rate) # +"_time"+str(dt_now)
     
     if assignment_type == 0:
         # deterministic, it can also be used for the case without multiplexing
@@ -624,7 +638,7 @@ def main_with_LE():
     print('start simulation')
     print(dt_now)
     
-    res, rates, errors, assignment, DFrates, DFerrors, nonDFLErates, nonDFLEerrors = run_decoder_with_assignment_with_DFLE(
+    res, rates, errors, assignment, DFrates, DFerrors, nonDFLErates, nonDFLEerrors, erasure_rates = run_decoder_with_assignment_with_DFLE(
         code=code,
         num_multiplexing=num_multiplexing,
         assignment_type = assignment_type,
@@ -648,7 +662,8 @@ def main_with_LE():
         max_erasure_rate=max_erasure_rate,
         min_erasure_rate=min_erasure_rate,
         num_steps=num_steps,
-        num_trials=num_trials
+        num_trials=num_trials,
+        erasure_rates=erasure_rates
     )
 
     print('finished')
