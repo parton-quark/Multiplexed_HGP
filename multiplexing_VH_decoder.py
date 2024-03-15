@@ -566,50 +566,7 @@ def main_without_LE():
             dt_now = datetime.datetime.now()
             print(dt_now)
         return 0
-            
-# [[100,4]]
-# H1_n100 = generate_random_H_matrix(total_bits=8,bit_node_deg=3,check_node_deg=4)
-# H2_n100 = generate_random_H_matrix(total_bits=8,bit_node_deg=3,check_node_deg=4)
-# HGP_n100 = HGP_code(H1_n100,H2_n100)
-        
 
-    #num_multiplexing=2
-#     ms = [2,4,8,16]
-#     for num_multiplexing in ms:
-#         for i in [0,1,2]:
-#             assignment_type = i
-    
-#             res, rates, errors, assignment, DFrates, DFerrors, nonDFLErates, nonDFLEerrors = run_decoder_with_assignment_with_DFLE(
-#                 code=code,
-#                 num_multiplexing=num_multiplexing,
-#                 assignment_type = assignment_type,
-#                 num_trials=num_trials,
-#                 max_erasure_rate=max_erasure_rate,
-#                 min_erasure_rate=min_erasure_rate,
-#                 num_steps=num_steps)
-    
-#             save_results_with_DFLE(
-#                 assignment_type=assignment_type,
-#                 assignment=assignment,
-#                 res=res,
-#                 rate=rates,
-#                 error=errors,
-#                 DFrates=DFrates,
-#                 DFerrors=DFerrors,
-#                 nonDFLErates=nonDFLErates,
-#                 nonDFLEerrors=nonDFLEerrors,
-#                 code=code,
-#                 num_multiplexing=num_multiplexing,
-#                 max_erasure_rate=max_erasure_rate,
-#                 min_erasure_rate=min_erasure_rate,
-#                 num_steps=num_steps,
-#                 num_trials=num_trials
-#             )
-#             print('m=' + str(num_multiplexing) + ' with assignment' + str(i) + 'finished')
-#             dt_now = datetime.datetime.now()
-#             print(dt_now)
-    
-        
 def main_with_LE():
     # inputs
     
@@ -670,7 +627,6 @@ def main_with_LE():
     dt_now = datetime.datetime.now()
     print(dt_now)
     return 0
-            
-            
+
 # main()
 main_with_LE()
