@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH -p compute
-#SBATCH --time=15:00:00
-#SBATCH --mem=10G
+#SBATCH --time=19:00:00
+#SBATCH --mem=20G
 #SBATCH --job-name=QM_sc13      # Job name\
 #SBATCH -c 1                    # Run all processes on a single node\
 #SBATCH --ntasks=1                   # Run a single task\
