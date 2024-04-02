@@ -584,15 +584,14 @@ def main_with_LE():
     # sys.argv[0] is the file name
     
     num_multiplexing=int(sys.argv[1])
-    # assignment_type = int(sys.argv[2])
-    num_trials=int(sys.argv[4])
-    max_erasure_rate=float(sys.argv[5])
-    min_erasure_rate=float(sys.argv[6])
-    num_steps=int(sys.argv[7])
-    total_bits=int(sys.argv[8])
-    bit_node_deg=int(sys.argv[9])
-    check_node_deg=int(sys.argv[10])
-    assignment_type=int(sys.argv[11])
+    num_trials=int(sys.argv[2])
+    max_erasure_rate=float(sys.argv[3])
+    min_erasure_rate=float(sys.argv[4])
+    num_steps=int(sys.argv[5])
+    total_bits=int(sys.argv[6])
+    bit_node_deg=int(sys.argv[7])
+    check_node_deg=int(sys.argv[8])
+    assignment_type=int(sys.argv[9])
     print('make HGP code')
     # generate HGP code
     H1 = generate_random_H_matrix(total_bits=total_bits,bit_node_deg=bit_node_deg,check_node_deg=check_node_deg)
