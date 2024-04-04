@@ -7,7 +7,7 @@ from itertools import chain, combinations
 import json 
 import sys
 
-from Hypergraph_Product_Code_Construction_v3 import HGP_code, Toric3
+from Hypergraph_Product_Code_Construction_v3 import HGP_code, Toric3, compute_adjacency_list
 from peeling_cluster_decoder import combined_peeling_and_cluster_decoder
 from utilities import generate_erasure_pattern_index_set, generate_random_H_matrix, HGP_code, generate_random_error_index_set_with_erasure_support, index_to_biindex, biindex_to_index
 
@@ -38,6 +38,126 @@ def deterministically_assign_qubits_to_photons(num_multiplexing,num_photons):
             qubits.remove(picked_qubit)
         photons.append(qubits_in_photon)    
     return photons
+
+# Function to assign random, non-overlapping sets up qubits in the same stabilizer supports to photons.
+# Assumes the code is LDPC (in particular, that the rows of input matrix have constant weight).
+# (If combining Hx and Hz, assume these have the same weight rows, though they need not in general)
+# The number of qubits per photon should be a multiple of this weight.
+
+def photon_assigment_by_stabilizer_support(H,num_stabilizers_per_photon):
+    
+    # Infer the weight of the rows by looking at the first row in H
+    row_weight = np.count_nonzero(H[0])
+    
+    # Infer matrix size.
+    num_rows, num_cols = np.shape(H)
+    
+    # Infer number of qubits.
+    num_qubits = num_cols
+    
+    # Ideally the stabilizer support sets evenly partition the number of qubits, but this need not be true.
+    # In this case, use photons of size equal to stabilizer support weight (or a multiple of this).
+    # Any remaining qubits will get assigned to a "remainder photon".
+    max_photons, remainder_qubits = divmod(num_qubits,row_weight)
+    num_photons, remainder_stabilizers = divmod(max_photons,num_stabilizers_per_photon)
+
+    
+    # Initialize a list of photon qubit assingments.
+    list_of_qubits_per_photon = []
+        
+    # Identify qubit index list and shuffle; each row indicates the qubit support of a stabilizer generator.
+    assignment_H_list = compute_adjacency_list(H)
+    np.random.shuffle(assignment_H_list)
+    
+    # Ideally, we choose a subset of rows which partition the qubits, but this may not exist in general.
+    # We will search for such a partition by first selecting rows at random to assign to photons.
+    # Then any overlapping rows are removed from the matrix and we repeat the search with the reduced matrix.
+    # Any remaining qubits are grouped together in a one "bad" photon at the end.
+    new_assignment_H_list = assignment_H_list
+    while( (len(list_of_qubits_per_photon)<max_photons) and (len(new_assignment_H_list)>0) ):
+        # Take the first row of the matrix as our first set of qubits in a photon.
+        photon_row = assignment_H_list.pop()
+        list_of_qubits_per_photon.append(photon_row)
+        
+        # Build a new assignment H list using only those rows of the original list which do not share qubits.
+        new_assignment_H_list = []
+        for row in assignment_H_list:
+            if (photon_row.intersection(row) == set()):
+                new_assignment_H_list.append(row)
+        
+        # Replace the list with non intersecting rows.
+        assignment_H_list = new_assignment_H_list
+        
+    # Because of how the stabilizers generators are chosen, there may be remaining qubits.
+    # (That is, there are no remaining rows of H that do not overlap with previous choices).
+    # In this case, we will just do random assignment on the remaining qubits.
+    # Track the number true stabilizer-support photons; this number can change and may be of interest.
+    num_stab_supp_photons = len(list_of_qubits_per_photon)
+    
+    # To determine the remaining qubit indices, compare with the stabilizer support photons just created.
+    stab_qubit_set = set()
+    for temp_qubits_in_photon in list_of_qubits_per_photon:
+        stab_qubit_set.update(temp_qubits_in_photon)
+    # Bassically, anything which was not already thrown in a stabilizer is a remaining qubit.
+    remaining_qubits = set(range(0,num_qubits)).difference(stab_qubit_set)
+    # Cast as a list so it can be randomized.
+    remaining_qubits_list = list(remaining_qubits)
+    random.shuffle(remaining_qubits_list)
+    
+    # DEBUG
+    #print(remaining_qubits_list,num_stab_supp_photons)
+    
+    for i in range(max_photons - num_stab_supp_photons):
+        temp_photon = set()
+        for j in range(row_weight):
+            temp_photon.add(remaining_qubits_list.pop())
+        list_of_qubits_per_photon.append(temp_photon)
+        
+    # If the requested number of photons is fewer than the maximum, combine some photons.
+    # We assume here that the number of qubits in a photon is a multiple of the row weight.
+    new_list_of_qubits_per_photon = []
+    if (num_photons < max_photons):
+        for i in range(num_photons):
+            new_photon = set()
+            for j in range(num_stabilizers_per_photon):
+                new_photon.update(list_of_qubits_per_photon.pop())
+            new_list_of_qubits_per_photon.append(new_photon)
+    else:
+        new_list_of_qubits_per_photon = list_of_qubits_per_photon
+    
+    # If there are remaining qubits or stabilizers, group these in some remainder photons.
+    remainder_photon = set()
+    if (remainder_stabilizers > 0):
+        # The remaining stabilizer support sets can be grouped into one "remainder photon".
+        for leftover_photon in list_of_qubits_per_photon:
+            remainder_photon.update(leftover_photon)
+    if (remainder_qubits > 0):
+        #  Any remaining qubits can also be added to this photon, it will still be large enough.
+        remainder_photon.update(set(remaining_qubits_list))
+    
+    # If the remainder photon is non-empty, add it to the list of photons; it may be smaller than the others.
+    if (remainder_photon != set()):
+        new_list_of_qubits_per_photon.append(remainder_photon)
+        
+        
+    final_num_qubits_per_photon = row_weight*num_stabilizers_per_photon
+    final_num_stab_photons = num_stab_supp_photons/num_stabilizers_per_photon
+    final_num_rand_photons = num_photons-(num_stab_supp_photons//num_stabilizers_per_photon)
+    
+    # DEBUG:
+#     print("Number of photons used:",num_photons)
+#     print("Stabilizers per photon:",num_stabilizers_per_photon)
+#     print("Qubits per photon:",final_num_qubits_per_photon)
+#     print("Number of stabilizer-support photons:", final_num_stab_photons)
+#     print("Number of random photons:", final_num_rand_photons)
+#     print("Ratio of stabilizer photons to random photons:", final_num_stab_photons/final_num_rand_photons)
+#     print("Remainder photon size:",len(remainder_photon))
+
+    stab_assignment_list_of_qubits_per_photon = []
+    for qubit_set in new_list_of_qubits_per_photon:
+        stab_assignment_list_of_qubits_per_photon.append(list(qubit_set))
+
+    return stab_assignment_list_of_qubits_per_photon
 
 def make_erasure_vec_from_ph(assignment, erasure_pattern):
     erased_qubits = []
