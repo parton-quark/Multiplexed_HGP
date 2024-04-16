@@ -353,7 +353,7 @@ def HGP_different_row_and_col_assign_qubits_to_photons(num_multiplexing,num_phot
                 else:
                     # Vertical case
                     picked_qubit_biindex = index_to_biindex(
-                        index=picked_qubit_index,num_cols=HGP_code.r2,index_shift=HGP_code.num_v_qubits)
+                        index=picked_qubit_index,num_cols=HGP_code.r2,index_shift=HGP_code.num_h_qubits)
 
                 # Assign if first qubit.
                 if len(qubits_in_photon)==0:
