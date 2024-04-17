@@ -300,6 +300,8 @@ def success_DF_nonDFLE_rate_and_error_bar(results, num):
 # Assumes a HGP code and will only assign qubits in different rows/columns together.
 
 def HGP_different_row_and_col_assign_qubits_to_photons(num_multiplexing,num_photons,HGP_code):
+    # This is the Sudoku assignment strategy for HGP codes.
+    
     num_qubits = num_multiplexing * num_photons
     qubits = [i for i in range(num_qubits)]
     photons = []
