@@ -723,19 +723,19 @@ def save_results_with_DFLE(assignment_type,assignment,res,rate,error,DFrates, DF
     json_object = json.dumps(results_dictionary, indent=4)
     
     folder_name = "results/"
-    file_name_base = folder_name + "results_HGP_n" + str(code.num_qubits) + "_m="+str(num_multiplexing) + "_rate=" + str(min_erasure_rate)+"-"+str(max_erasure_rate) # +"_time"+str(dt_now)
-    
-    if assignment_type == 0:
+    file_name_base = folder_name + "results_HGP_n=" + str(code.num_qubits) + "_m="+str(num_multiplexing) + "_r=" + str(min_erasure_rate)+"-"+str(max_erasure_rate) # +"_time"+str(dt_now)
+    file_name_base = file_name_base +"_as=" + assignment_type
+    # if assignment_type == 0:
         # deterministic, it can also be used for the case without multiplexing
-        file_name = file_name_base+"_deterministic_assignment"
-    elif assignment_type == 1:
+        # file_name = file_name_base+"_deterministic_assignment"
+    # elif assignment_type == 1:
         # random
-        file_name = file_name_base+"_random_assignment"
-    elif assignment_type == 2:
+        # file_name = file_name_base+"_random_assignment"
+    # elif assignment_type == 2:
         # random with row col constraint
-        file_name = file_name_base+"_row_col_assignment"
-    else:
-        print("invalid assignment")
+        # file_name = file_name_base+"_row_col_assignment"
+    # else:
+        # print("invalid assignment")
     # Writing to json file
     
     file_name = file_name + ".json"
@@ -744,6 +744,16 @@ def save_results_with_DFLE(assignment_type,assignment,res,rate,error,DFrates, DF
         outfile.write(json_object)
         
     return results_dictionary, file_name
+
+
+def import_matrices(file_name):
+    file_name = file_name + ".json"
+    jsonfile = open(file_name, 'r')
+    json_load = json.load(jsonfile)
+    H1 = np.array(json_load['H1'])
+    H2 = np.array(json_load['H2'])
+    return [H1, H2]
+
 
 def main_without_LE():
 
@@ -836,16 +846,19 @@ def main_with_LE():
     max_erasure_rate=float(sys.argv[3])
     min_erasure_rate=float(sys.argv[4])
     num_steps=int(sys.argv[5])
-    total_bits=int(sys.argv[6])
-    bit_node_deg=int(sys.argv[7])
-    check_node_deg=int(sys.argv[8])
-    assignment_type=int(sys.argv[9])
-    print('make HGP code')
+    assignment_type=int(sys.argv[6])
+    input_matrices_filename=sys.argv[7]
+    #total_bits=int(sys.argv[6])
+    #bit_node_deg=int(sys.argv[7])
+    #check_node_deg=int(sys.argv[8])
+    #assignment_type=int(sys.argv[9])
+    #print('make HGP code')
     # generate HGP code
-    H1 = generate_random_H_matrix(total_bits=total_bits,bit_node_deg=bit_node_deg,check_node_deg=check_node_deg)
-    H2 = generate_random_H_matrix(total_bits=total_bits,bit_node_deg=bit_node_deg,check_node_deg=check_node_deg)
-    HGP = HGP_code(H1,H2)
-    code = HGP
+    #H1 = generate_random_H_matrix(total_bits=total_bits,bit_node_deg=bit_node_deg,check_node_deg=check_node_deg)
+    #H2 = generate_random_H_matrix(total_bits=total_bits,bit_node_deg=bit_node_deg,check_node_deg=check_node_deg)
+    
+    input_matrices = import_matrices(input_matrices_filename)
+    code = HGP_code(input_matrices[0],input_matrices[1])
     
     dt_start = datetime.datetime.now()
     print('start simulation')
