@@ -15,7 +15,7 @@ def make_shellscript(inputs):
     output_txt = '#SBATCH --output=' + 'output_' + str(configurations) + '.txt\n'
     datalist.append(output_txt)
     # run py
-    run = 'python multiplexing_VH_decoder.py' + str(inputs[0]) + ' ' + str(inputs[1]) + ' ' + str(inputs[2]) + ' ' + str(inputs[3]) + ' ' + str(inputs[4]) + ' ' + str(inputs[5]) + ' ' + str(inputs[6]) + '\n'
+    run = 'python ../multiplexing_VH_decoder.py ' + str(inputs[0]) + ' ' + str(inputs[1]) + ' ' + str(inputs[2]) + ' ' + str(inputs[3]) + ' ' + str(inputs[4]) + ' ' + str(inputs[5]) + ' ' + str(inputs[6]) + '\n'
     datalist.append(run)
     
     f.writelines(datalist)
