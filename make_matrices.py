@@ -37,7 +37,7 @@ def make_and_save_symmetric_matrices(total_bits, bit_node_deg, check_node_deg, f
     json_object = {'H1':H1.tolist(), 'H2':H2.tolist()}
     json_object = json.dumps(json_object, indent=4)
     folder_name = "input_matrices/"
-    file_name = folder_name + file_name + ".json"    
+    file_name = folder_name + file_name + "_symmetric.json"    
     with open(file_name, "w") as outfile:
         outfile.write(json_object)
     return None
