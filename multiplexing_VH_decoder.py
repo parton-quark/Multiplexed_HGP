@@ -559,50 +559,30 @@ def HGP_different_row_and_col_assign_qubits_to_photons(num_multiplexing,num_phot
     return photons #, photons_biindex
 
 
-def run_decoder_with_assignment(
-    code,num_multiplexing,assignment_type,num_trials,max_erasure_rate,min_erasure_rate,num_steps):
-    num_photons = code.num_qubits//num_multiplexing
-    
-    if assignment_type == 0:
-        # deterministic, it can also be used for the case without multiplexing
-        assignment = deterministically_assign_qubits_to_photons(num_multiplexing,num_photons)
-    elif assignment_type == 1:
-        # random
-        assignment = randomly_assign_qubits_to_photons(num_multiplexing,num_photons)
-    elif assignment_type == 2:
-        # random with row col constraint
-        assignment=HGP_different_row_and_col_assign_qubits_to_photons(
-        num_multiplexing=num_multiplexing,num_photons=num_photons,HGP_code=code)
-    else:
-        print("invalid assignment")
-    
-    res = []
-    step_size = (max_erasure_rate-min_erasure_rate)/num_steps
-    erasure_rates = [i*step_size+min_erasure_rate for i in range(num_steps)]
-    
-    for i in erasure_rates:
-        res_trials = get_success_prob(
-            HGP=code,assignment=assignment,num_trials=num_trials,num_photons=num_photons,erasure_rate=i)
-        res.append(res_trials)
-        
-    rate, error = rate_and_error(res,num_steps)
-        
-    return res,rate, error, assignment
 
 def run_decoder_with_assignment_with_DFLE(
     code,num_multiplexing,assignment_type,num_trials,max_erasure_rate,min_erasure_rate,num_steps):
     num_photons = code.num_qubits//num_multiplexing
     
     if assignment_type == 0:
-        # deterministic, it can also be used for the case without multiplexing
-        assignment = deterministically_assign_qubits_to_photons(num_multiplexing,num_photons)
-    elif assignment_type == 1:
         # random
         assignment = randomly_assign_qubits_to_photons(num_multiplexing,num_photons)
+    elif assignment_type == 1:
+        # deterministic, it can also be used for the case without multiplexing
+        # Row-Col assignment
+        assignment = deterministically_assign_qubits_to_photons(num_multiplexing,num_photons)
     elif assignment_type == 2:
         # random with row col constraint
-        assignment=HGP_different_row_and_col_assign_qubits_to_photons(
+        # Sudoku assignment
+        assignment = HGP_different_row_and_col_assign_qubits_to_photons(
         num_multiplexing=num_multiplexing,num_photons=num_photons,HGP_code=code)
+    elif assignment_type == 3:
+        # Stabilizer assignment
+        assignment = photon_assigment_by_stabilizer_support(
+            H=np.concatenate((code.Hz,code.Hx),axis=0),num_stabilizers_per_photon=1)
+    elif assignment_type == 4:
+        assignment = HGP_diagonal_assign_qubits_to_photons(
+            num_multiplexing=num_multiplexing,HGP_code=code)
     else:
         print("invalid assignment")
     
@@ -618,59 +598,6 @@ def run_decoder_with_assignment_with_DFLE(
     rates, errors, DFrates, DFerrors, nonDFLErates, nonDFLEerrors = success_DF_nonDFLE_rate_and_error_bar(res, num_steps) 
     return res, rates, errors, assignment, DFrates, DFerrors, nonDFLErates, nonDFLEerrors, erasure_rates
 
-def save_results(assignment_type,assignment,res,rate,error,code,num_multiplexing,max_erasure_rate,min_erasure_rate,num_steps,num_trials):
-    
-    num_photons = code.num_qubits//num_multiplexing
-    dt_now = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
-    step_size = (max_erasure_rate-min_erasure_rate)/num_steps
-    # Data to be written
-    results_dictionary = {
-        "Code_length": code.num_qubits,
-        "Code_dimension": code.dim,
-        "assignment type": assignment_type,
-        "max_erasure_rate": max_erasure_rate,
-        "min_erasure_rate": min_erasure_rate,
-        "num_steps": num_steps,
-        "stepsize" : step_size, 
-        "num_multiplexing": num_multiplexing,
-        "num_photons": num_photons,
-        "num_trials": num_trials,
-        "time": dt_now,
-        "res": res,
-        "rate": rate,
-        "error": error,
-        "timestamp": dt_now,
-        "assignment": assignment,
-        "HGP.Hx": code.Hx.tolist(),
-        "HGP.Hz": code.Hx.tolist(),
-        "H1": code.H1.tolist(),
-        "H2": code.H2.tolist()
-    }
-
- 
-    # Serializing json
-    json_object = json.dumps(results_dictionary, indent=4)
-    
-    folder_name = "results/"
-    file_name_base = folder_name+"results_HGP_n"+str(code.num_qubits)+"_m="+str(num_multiplexing)+"_rate"+str(rate[0])+"-"+str(rate[-1])+"_time"+str(dt_now)
-    
-    if assignment_type == 0:
-        # deterministic, it can also be used for the case without multiplexing
-        file_name = file_name_base+"_deterministic_assignment"
-    elif assignment_type == 1:
-        # random
-        file_name = file_name_base+"_random_assignment"
-    elif assignment_type == 2:
-        # random with row col constraint
-        file_name = file_name_base+"_row_col_assignment"
-    else:
-        print("invalid assignment")
-    # Writing to sample.json
-    
-    with open(file_name+".json", "w") as outfile:
-        outfile.write(json_object)
-        
-    return results_dictionary
 
 def save_results_with_DFLE(assignment_type,assignment,res,rate,error,DFrates, DFerrors, nonDFLErates, nonDFLEerrors,code,num_multiplexing,max_erasure_rate,min_erasure_rate,num_steps,num_trials,erasure_rates,dt_start, dt_finished):
     
@@ -724,7 +651,7 @@ def save_results_with_DFLE(assignment_type,assignment,res,rate,error,DFrates, DF
     
     folder_name = "results/"
     file_name_base = folder_name + "results_HGP_n=" + str(code.num_qubits) + "_m="+str(num_multiplexing) + "_r=" + str(min_erasure_rate)+"-"+str(max_erasure_rate) # +"_time"+str(dt_now)
-    file_name_base = file_name_base +"_as=" + assignment_type
+    file_name_base = file_name_base +"_as=" + str(assignment_type)
     # if assignment_type == 0:
         # deterministic, it can also be used for the case without multiplexing
         # file_name = file_name_base+"_deterministic_assignment"
@@ -738,7 +665,7 @@ def save_results_with_DFLE(assignment_type,assignment,res,rate,error,DFrates, DF
         # print("invalid assignment")
     # Writing to json file
     
-    file_name = file_name + ".json"
+    file_name = file_name_base + ".json"
     
     with open(file_name, "w") as outfile:
         outfile.write(json_object)
@@ -755,84 +682,6 @@ def import_matrices(file_name):
     return [H1, H2]
 
 
-def main_without_LE():
-
-    H1_n100 = generate_random_H_matrix(total_bits=8,bit_node_deg=3,check_node_deg=4)
-    H2_n100 = generate_random_H_matrix(total_bits=8,bit_node_deg=3,check_node_deg=4)
-    HGP_n100 = HGP_code(H1_n100,H2_n100)
-
-    # QM = 1
-    num_multiplexing = 1
-    assignment_type = 0
-    num_trials=10000
-    max_erasure_rate=0.55
-    min_erasure_rate=0.2
-    num_steps=35
-    
-    dt_now = datetime.datetime.now()
-    print(dt_now)
-    
-    
-    res,rate, error, assignment = run_decoder_with_assignment(
-        code=HGP_n100,
-        num_multiplexing=num_multiplexing,
-        assignment_type = assignment_type,
-        num_trials=num_trials,
-        max_erasure_rate=max_erasure_rate,
-        min_erasure_rate=min_erasure_rate,
-        num_steps=num_steps)
-
-    save_results(
-        assignment_type=assignment_type,
-        assignment=assignment,
-        res=res,rate=rate,
-        error=error,
-        code=HGP_n100,
-        num_multiplexing=num_multiplexing,
-        max_erasure_rate=max_erasure_rate,
-        min_erasure_rate=min_erasure_rate,
-        num_steps=num_steps,
-        num_trials=num_trials
-        )
-
-    print('QM=1 finished')
-    dt_now = datetime.datetime.now()
-    print(dt_now)
-    
-    
-
-    #num_multiplexing=2
-    
-    for num_multiplexing in [2,5,10]:
-
-        for i in [0,1,2]:
-            assignment_type = i
-    
-            res,rate, error, assignment = run_decoder_with_assignment(
-                code=HGP_n100,
-                num_multiplexing=num_multiplexing,
-                assignment_type = assignment_type,
-                num_trials=num_trials,
-                max_erasure_rate=max_erasure_rate,
-                min_erasure_rate=min_erasure_rate,
-                num_steps=num_steps)
-    
-            save_results(
-                assignment_type=assignment_type,
-                assignment=assignment,
-                res=res,rate=rate,
-                error=error,
-                code=HGP_n100,
-                num_multiplexing=num_multiplexing,
-                max_erasure_rate=max_erasure_rate,
-                min_erasure_rate=min_erasure_rate,
-                num_steps=num_steps,
-                num_trials=num_trials
-                )
-            print('QM=2 with assignment' + str(i) + 'finished')
-            dt_now = datetime.datetime.now()
-            print(dt_now)
-        return 0
 
 def main_with_LE():
     # inputs
