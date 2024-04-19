@@ -24,26 +24,28 @@ def read_multiple_jsons(json_file_names):
 def json_to_data(json_file_name):
     data = open(json_file_name)
     data = json.load(data)
-    res = data['success_rate']
-    rates = []
-    errors = []
-    
-    for i in range(len(res)):
-        num_success = res[i][0]
-        num_fail = res[i][1]
-        rate = num_fail / (num_success + num_fail)
-        rates.append(rate)
-        error = agresti_coull_intetrval([num_success, num_fail])
-        errors.append(error)
-    label = 'm=' + str(data['multiplexing']) + ' , strategy=' + str(data['strategy'])
-    return res,rates,errors,label
+    erasure_rates = data['erasure_rates']
+    success_rates = data['success_rate']
+    error_bar_for_success_rates = data['error_bar_for_success_rate']  
+    decoding_failure_rates = data['DFrate']
+    non_df_le_rates = data['nonDFLErate']
 
-def plot_multiple_data(list_of_res, phys_err, save = False, grid = True, log = False):
+
+    label = 'm=' + str(data['num_multiplexing']) + ' , strategy=' + str(data['assignment type'])
+    return label, erasure_rates, success_rates,error_bar_for_success_rates,decoding_failure_rates, non_df_le_rates
+
+
+
+def plot_multiple_data(list_of_res, phys_err, save = False, grid = True, log = False, with_le_and_df=False):
     fig = plt.figure()
     ax = fig.add_subplot(1,1,1)
     
     for i in list_of_res:
-        ax.errorbar(phys_err, i[1], i[2], linewidth= 1, label = i[3])
+        ax.errorbar(phys_err, i[2], i[3], linewidth= 1, label = i[0])
+        if with_le_and_df == True:
+            ax.plot(phys_err, i[4], linewidth = 1, label = i[0] + 'DF') # decoding failure rates
+            ax.plot(phys_err, i[5], linewidth = 1, label = i[0] + 'non DF LE') # non decoding failure logical error rates 
+
     if grid == True:
         ax.grid(which="major", alpha=0.6)
         ax.grid(which="minor", alpha=0.3)
@@ -53,7 +55,7 @@ def plot_multiple_data(list_of_res, phys_err, save = False, grid = True, log = F
     ax.set_ylabel(r"logical $Z$ error probability", fontsize = 15)
     ax.set_xlim(0, 1)
     plt.style.use('tableau-colorblind10')
-    plt.legend(loc='lower right', fontsize = 13)
+    plt.legend(loc='lower right', fontsize = 8)
     if save == True:
         filename = "multiplexed_toric"
         plt.savefig(filename + ".pdf")
