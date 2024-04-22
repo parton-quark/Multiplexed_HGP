@@ -4,7 +4,7 @@ def make_shellscript(inputs):
     configurations = str(inputs[0]) + '_' + str(inputs[1]) + '_' + str(inputs[2]) + '_' + str(inputs[3]) + '_' + str(inputs[4]) + '_' + str(inputs[5]) + '_' + str(inputs[6])
     #file_name = configurations + '.sh'
     
-    file_name = 'scripts/' + inputs[-1] + "_assign"+str(inputs[-2]) + "_script.sh"
+    file_name = 'scripts/' + inputs[-1] + "_multiplex"+str(inputs[0]) + "_assign"+str(inputs[-2]) + "_script.sh"
 
     f = open(file_name, 'w')
     datalist = ['#!/bin/bash\n', '#SBATCH -p compute\n', '#SBATCH --time=99:00:00\n', '#SBATCH --mem=20G\n', '#SBATCH -c 1\n', '#SBATCH --ntasks=1\n', ]
@@ -22,13 +22,13 @@ def make_shellscript(inputs):
     f.close()
     return 0
 
-num_multiplexing = 8
-num_trials = 100
+num_multiplexing = 4
+num_trials = 100000
 max_erasure_rate = 1
 min_erasure_rate = 0
-num_steps = 10
-assignment_type = 2
-input_matrices_filename = 'N320'
+num_steps = 101
+assignment_type = 4
+input_matrices_filename = 'N32_K18_symmetric'
 
 inputs = [num_multiplexing, 
     num_trials,
@@ -38,4 +38,27 @@ inputs = [num_multiplexing,
     assignment_type,
     input_matrices_filename]
 
-make_shellscript(inputs)
+
+#make_shellscript(inputs)
+
+
+for assignment_number in [0,1,2,3,4]:
+    num_multiplexing = 16
+    num_trials = 100000
+    max_erasure_rate = 1
+    min_erasure_rate = 0
+    num_steps = 101
+    assignment_type = assignment_number
+    input_matrices_filename = 'N1280_K290'
+
+    inputs2 = [num_multiplexing, 
+        num_trials,
+        max_erasure_rate,
+        min_erasure_rate,
+        num_steps,
+        assignment_type,
+        input_matrices_filename]
+
+    #make_shellscript(inputs2)
+
+
