@@ -51,9 +51,10 @@ def plot_multiple_data(list_of_res, phys_err, save = False, grid = True, log = F
         ax.grid(which="minor", alpha=0.3)
     if log == True:
         ax.set_yscale('log')
+
     ax.set_xlabel("photon loss probability", fontsize = 15)
     ax.set_ylabel(r"logical $Z$ error probability", fontsize = 15)
-    ax.set_xlim(0, 1)
+    # ax.set_xlim(0, 1)
     plt.style.use('tableau-colorblind10')
     plt.legend(loc='lower right', fontsize = 8)
     if save == True:
