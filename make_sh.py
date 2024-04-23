@@ -7,7 +7,7 @@ def make_shellscript(inputs):
     file_name = 'scripts/' + inputs[-1] + "_multiplex"+str(inputs[0]) + "_assign"+str(inputs[-2]) + "_script.sh"
 
     f = open(file_name, 'w')
-    datalist = ['#!/bin/bash\n', '#SBATCH -p compute\n', '#SBATCH --time=99:00:00\n', '#SBATCH --mem=20G\n', '#SBATCH -c 1\n', '#SBATCH --ntasks=1\n', ]
+    datalist = ['#!/bin/bash\n', '#SBATCH -p compute\n', '#SBATCH --time=90:00:00\n', '#SBATCH --mem=20G\n', '#SBATCH -c 1\n', '#SBATCH --ntasks=1\n', ]
     # job_name
     job_name = '#SBATCH --job-name=' + str(configurations) + '\n'
     datalist.append(job_name)
