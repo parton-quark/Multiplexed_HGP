@@ -378,7 +378,7 @@ def save_results_with_DFLE(assignment_type,assignment,res,rate,error,DFrates, DF
     # Serializing json
     json_object = json.dumps(results_dictionary, indent=4)
     
-    folder_name = "results/"
+    folder_name = "../results/"
     file_name_base = folder_name + "results_HGP_n=" + str(code.num_qubits) + "_m="+str(num_multiplexing) + "_r=" + str(min_erasure_rate)+"-"+str(max_erasure_rate) # +"_time"+str(dt_now)
     file_name_base = file_name_base +"_as=" + str(assignment_type)
     # if assignment_type == 0:
