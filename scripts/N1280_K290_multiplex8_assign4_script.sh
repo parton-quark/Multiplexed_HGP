@@ -1,6 +1,6 @@
 #!/bin/bash
 #SBATCH -p compute
-#SBATCH --time=99:00:00
+#SBATCH --time=90:00:00
 #SBATCH --mem=20G
 #SBATCH -c 1
 #SBATCH --ntasks=1
