@@ -8,4 +8,4 @@
 #SBATCH --output=output_2_100000_1_0_101_2_N8_K2_symmetric.txt
 
 source /apps/unit/NemotoU/NicholasSoftware/bin/activate
-python ../multiplexing_VH_decoder.py 2 100000 1 0 101 2 N8_K2_symmetric
+python ../multiplexing_VH_decoder.py 2 100000 1 0 101 2 ../input_matrices/N8_K2_symmetric
