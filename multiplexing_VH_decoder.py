@@ -365,6 +365,11 @@ def save_results_with_DFLE(
 
     dt_diff = dt_finished - dt_start
     dt_duration = (divmod(round(dt_diff.total_seconds()),3600)[0], divmod(round(dt_diff.total_seconds()),3600)[1]//60)
+
+    dt_start_str = dt_start.strftime("%Y%m%d%H%M%S")
+    dt_finished_str = dt_finished.strftime("%Y%m%d%H%M%S")
+
+
     
     # Data to be written
     failure_reasonlist = []
@@ -387,8 +392,8 @@ def save_results_with_DFLE(
         "num_multiplexing": num_multiplexing,
         "num_photons": num_photons,
         "num_trials": num_trials,
-        "dt_start": dt_start, 
-        "dt_finished": dt_finished,
+        "dt_start": dt_start_str, 
+        "dt_finished": dt_finished_str,
         "dt_now": dt_now,
         "dt_duration": dt_duration,
         "erasure_rates": erasure_rates,
@@ -474,7 +479,7 @@ def main_with_LE():
     dt_start = datetime.datetime.now()
     print('start simulation')
     print(dt_start)
-    dt_start = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
+    #dt_start = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
     
     res, assignment, success_rates, success_errors, failure_rates, failure_errors, DFrates, DFerrors, nonDFLErates, nonDFLEerrors, erasure_rates = run_decoder_with_assignment_with_DFLE(
         code=code,
