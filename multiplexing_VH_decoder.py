@@ -119,8 +119,11 @@ def rate_and_error(results, num):
     return rates, errors
 
 def success_DF_nonDFLE_rate_and_error_bar(results, num):
-    rates = []
-    errors = []
+    success_rates = []
+    success_errors = []
+
+    failure_rates = []
+    failure_errors = []
     
     DFrates = []
     DFerrors = []
@@ -135,20 +138,24 @@ def success_DF_nonDFLE_rate_and_error_bar(results, num):
         num_nonDFLE = results[i][3]
         
         
-        rate = num_fail / (num_success + num_fail)
-        rates.append(rate)
+        success_rate = num_success / (num_success + num_fail)
+        success_rates.append(success_rate)
+        failure_rate = num_fail / (num_success + num_fail)
+        failure_rates.append(failure_rate)
         DFrate = num_DF / (num_success + num_fail)
         DFrates.append(DFrate)
         nonDFLErate = num_nonDFLE / (num_success + num_fail)
         nonDFLErates.append(nonDFLErate)
         
-        error = agresti_coull_intetrval([num_success, num_fail])
-        errors.append(error)
+        success_error = agresti_coull_intetrval([num_success, num_fail])
+        success_errors.append(success_error)
+        failure_error = agresti_coull_intetrval([num_fail, num_success])
+        failure_errors.append(failure_error)
         DFerror = agresti_coull_intetrval([num_DF, (num_success + num_fail - num_DF)])
         DFerrors.append(DFerror)
         nonDFLEerror = agresti_coull_intetrval([num_nonDFLE, (num_success + num_fail - num_nonDFLE)])
         nonDFLEerrors.append(nonDFLEerror)
-    return rates, errors, DFrates, DFerrors, nonDFLErates, nonDFLEerrors
+    return success_rates, success_errors, failure_rates, failure_errors, DFrates, DFerrors, nonDFLErates, nonDFLEerrors
 
 
 # A function to partion the the qubits in a code into different photons of equal size.
@@ -294,22 +301,25 @@ def run_decoder_with_assignment_with_DFLE(
     num_photons = code.num_qubits//num_multiplexing
     
     if assignment_type == 0:
+        # no multiplexing
+        assignment = [[i] for i in range(code.num_qubits)]
+    elif assignment_type == 1:
         # random
         assignment = randomly_assign_qubits_to_photons(num_multiplexing,num_photons)
-    elif assignment_type == 1:
+    elif assignment_type == 2:
         # deterministic, it can also be used for the case without multiplexing
         # Row-Col assignment
         assignment = deterministically_assign_qubits_to_photons(num_multiplexing,num_photons)
-    elif assignment_type == 2:
+    elif assignment_type == 3:
         # random with row col constraint
         # Sudoku assignment
         assignment = HGP_different_row_and_col_assign_qubits_to_photons(
         num_multiplexing=num_multiplexing,num_photons=num_photons,HGP_code=code)
-    elif assignment_type == 3:
+    elif assignment_type == 4:
         # Stabilizer assignment
         assignment = photon_assigment_by_stabilizer_support(
             H=np.concatenate((code.Hz,code.Hx),axis=0),num_stabilizers_per_photon=1)
-    elif assignment_type == 4:
+    elif assignment_type == 5:
         assignment = HGP_diagonal_assign_qubits_to_photons(
             num_multiplexing=num_multiplexing,HGP_code=code)
     else:
@@ -324,8 +334,8 @@ def run_decoder_with_assignment_with_DFLE(
         res_trials = get_DF_and_LE_and_failure_prob(HGP=code,assignment=assignment,num_trials=num_trials,num_photons=num_photons,erasure_rate=i)
         res.append(res_trials)
         
-    rates, errors, DFrates, DFerrors, nonDFLErates, nonDFLEerrors = success_DF_nonDFLE_rate_and_error_bar(res, num_steps) 
-    return res, rates, errors, assignment, DFrates, DFerrors, nonDFLErates, nonDFLEerrors, erasure_rates
+    success_rates, success_errors, failure_rates, failure_errors, DFrates, DFerrors, nonDFLErates, nonDFLEerrors = success_DF_nonDFLE_rate_and_error_bar(res, num_steps) 
+    return res, assignment, success_rates, success_errors, failure_rates, failure_errors, DFrates, DFerrors, nonDFLErates, nonDFLEerrors, erasure_rates
 
 
 def save_results_with_DFLE(assignment_type,assignment,res,rate,error,DFrates, DFerrors, nonDFLErates, nonDFLEerrors,code,num_multiplexing,max_erasure_rate,min_erasure_rate,num_steps,num_trials,erasure_rates,dt_start, dt_finished):
@@ -333,8 +343,11 @@ def save_results_with_DFLE(assignment_type,assignment,res,rate,error,DFrates, DF
     num_photons = code.num_qubits//num_multiplexing
     dt_now = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
     step_size = (max_erasure_rate-min_erasure_rate)/num_steps
-    # Data to be written
+
+    dt_diff = dt_finished - dt_start
+    dt_duration = dt_duration = (divmod(round(dt_diff.total_seconds()),3600)[0], divmod(round(dt_diff.total_seconds()),3600)[1]//60)
     
+    # Data to be written
     failure_reasonlist = []
     num_DFlist = []
     num_nonDFLElist = []
@@ -358,6 +371,7 @@ def save_results_with_DFLE(assignment_type,assignment,res,rate,error,DFrates, DF
         "dt_start": dt_start, 
         "dt_finished": dt_finished,
         "dt_now": dt_now,
+        "dt_duration": dt_duration,
         "erasure_rates": erasure_rates,
         "results": res,
         "success_rate": rate,
@@ -441,7 +455,7 @@ def main_with_LE():
     print(dt_start)
     dt_start = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
     
-    res, rates, errors, assignment, DFrates, DFerrors, nonDFLErates, nonDFLEerrors, erasure_rates = run_decoder_with_assignment_with_DFLE(
+    res, assignment, success_rates, success_errors, failure_rates, failure_errors, DFrates, DFerrors, nonDFLErates, nonDFLEerrors, erasure_rates = run_decoder_with_assignment_with_DFLE(
         code=code,
         num_multiplexing=num_multiplexing,
         assignment_type = assignment_type,
@@ -454,13 +468,18 @@ def main_with_LE():
     dt_finished = datetime.datetime.now()
     print(dt_finished)
     dt_finished = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
+
+    # Infer the time difference
+    dt_difference = dt_finished-dt_start
     
     save = save_results_with_DFLE(
         assignment_type=assignment_type,
         assignment=assignment,
         res=res,
-        rate=rates,
-        error=errors,
+        success_rates=success_rates,
+        success_errors=success_errors,
+        failure_rates=failure_rates,
+        failure_errors=failure_rates,
         DFrates=DFrates,
         DFerrors=DFerrors,
         nonDFLErates=nonDFLErates,
