@@ -338,14 +338,33 @@ def run_decoder_with_assignment_with_DFLE(
     return res, assignment, success_rates, success_errors, failure_rates, failure_errors, DFrates, DFerrors, nonDFLErates, nonDFLEerrors, erasure_rates
 
 
-def save_results_with_DFLE(assignment_type,assignment,res,rate,error,DFrates, DFerrors, nonDFLErates, nonDFLEerrors,code,num_multiplexing,max_erasure_rate,min_erasure_rate,num_steps,num_trials,erasure_rates,dt_start, dt_finished):
+def save_results_with_DFLE(
+        assignment_type,
+        assignment,
+        res,
+        success_rates,
+        success_errors,
+        failure_rates,
+        failure_errors,
+        DFrates,
+        DFerrors,
+        nonDFLErates,
+        nonDFLEerrors,
+        code,
+        num_multiplexing,
+        max_erasure_rate,
+        min_erasure_rate,
+        num_steps,num_trials,
+        erasure_rates,
+        dt_start,
+        dt_finished):
     
     num_photons = code.num_qubits//num_multiplexing
     dt_now = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
     step_size = (max_erasure_rate-min_erasure_rate)/num_steps
 
     dt_diff = dt_finished - dt_start
-    dt_duration = dt_duration = (divmod(round(dt_diff.total_seconds()),3600)[0], divmod(round(dt_diff.total_seconds()),3600)[1]//60)
+    dt_duration = (divmod(round(dt_diff.total_seconds()),3600)[0], divmod(round(dt_diff.total_seconds()),3600)[1]//60)
     
     # Data to be written
     failure_reasonlist = []
@@ -374,10 +393,12 @@ def save_results_with_DFLE(assignment_type,assignment,res,rate,error,DFrates, DF
         "dt_duration": dt_duration,
         "erasure_rates": erasure_rates,
         "results": res,
-        "success_rate": rate,
-        "error_bar_for_success_rate": error,
-        "failure_reason":failure_reasonlist,
-        "num_DF":num_DFlist,
+        "success_rates": success_rates,
+        "success_rates_error_bars": success_errors,
+        "failure_rates": failure_rates,
+        "failure_rates_error_bars": failure_errors,
+        "failure_reason": failure_reasonlist,
+        "num_DF": num_DFlist,
         "num_nonDFLE": num_nonDFLElist,
         "DFrate": DFrates,
         "DFerrors": DFerrors,
@@ -467,10 +488,9 @@ def main_with_LE():
     print('simulation finished')
     dt_finished = datetime.datetime.now()
     print(dt_finished)
-    dt_finished = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
+    #dt_finished = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
 
-    # Infer the time difference
-    dt_difference = dt_finished-dt_start
+
     
     save = save_results_with_DFLE(
         assignment_type=assignment_type,
