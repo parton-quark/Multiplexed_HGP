@@ -71,3 +71,15 @@ def chosen_equal_block_matrices(m,file_name, save = True):
 
 # make_and_save_matrices(total_bits=16,bit_node_deg=2,check_node_deg=4,file_name="N320")
 # make_and_save_symmetric_matrices(8,3,4,"test_matrix")
+
+
+def save_matrices(H1,H2,file_name):
+
+    json_object = {'H1':H1.tolist(), 'H2':H2.tolist()}
+    json_object = json.dumps(json_object, indent=4)
+    folder_name = "input_matrices/"
+    file_name = folder_name + file_name + ".json"
+    
+    with open(file_name, "w") as outfile:
+        outfile.write(json_object)
+    return None
