@@ -89,7 +89,7 @@ def get_DF_and_LE_and_failure_prob(HGP, assignment, num_trials, num_photons, era
     return res_trials
 
 
-def agresti_coull_intetrval(pair):
+def agresti_coull_interval(pair):
     # num trial n
     success = pair[0]
     fail = pair[1]
@@ -114,7 +114,7 @@ def rate_and_error(results, num):
         num_fail = results[i][1]
         rate = num_fail / (num_success + num_fail)
         rates.append(rate)
-        error = agresti_coull_intetrval([num_success, num_fail])
+        error = agresti_coull_interval([num_success, num_fail])
         errors.append(error)
     return rates, errors
 
@@ -147,13 +147,13 @@ def success_DF_nonDFLE_rate_and_error_bar(results, num):
         nonDFLErate = num_nonDFLE / (num_success + num_fail)
         nonDFLErates.append(nonDFLErate)
         
-        success_error = agresti_coull_intetrval([num_success, num_fail])
+        success_error = agresti_coull_interval([num_success, num_fail])
         success_errors.append(success_error)
-        failure_error = agresti_coull_intetrval([num_fail, num_success])
+        failure_error = agresti_coull_interval([num_fail, num_success])
         failure_errors.append(failure_error)
-        DFerror = agresti_coull_intetrval([num_DF, (num_success + num_fail - num_DF)])
+        DFerror = agresti_coull_interval([num_DF, (num_success + num_fail - num_DF)])
         DFerrors.append(DFerror)
-        nonDFLEerror = agresti_coull_intetrval([num_nonDFLE, (num_success + num_fail - num_nonDFLE)])
+        nonDFLEerror = agresti_coull_interval([num_nonDFLE, (num_success + num_fail - num_nonDFLE)])
         nonDFLEerrors.append(nonDFLEerror)
     return success_rates, success_errors, failure_rates, failure_errors, DFrates, DFerrors, nonDFLErates, nonDFLEerrors
 
@@ -307,18 +307,18 @@ def run_decoder_with_assignment_with_DFLE(
         # random
         assignment = randomly_assign_qubits_to_photons(num_multiplexing,num_photons)
     elif assignment_type == 2:
-        # deterministic, it can also be used for the case without multiplexing
-        # Row-Col assignment
-        assignment = deterministically_assign_qubits_to_photons(num_multiplexing,num_photons)
+        # Stabilizer assignment
+        assignment = photon_assigment_by_stabilizer_support(
+            H=np.concatenate((code.Hz,code.Hx),axis=0),num_stabilizers_per_photon=1)
     elif assignment_type == 3:
         # random with row col constraint
         # Sudoku assignment
         assignment = HGP_different_row_and_col_assign_qubits_to_photons(
         num_multiplexing=num_multiplexing,num_photons=num_photons,HGP_code=code)
     elif assignment_type == 4:
-        # Stabilizer assignment
-        assignment = photon_assigment_by_stabilizer_support(
-            H=np.concatenate((code.Hz,code.Hx),axis=0),num_stabilizers_per_photon=1)
+        # deterministic, it can also be used for the case without multiplexing
+        # Row-Col assignment
+        assignment = deterministically_assign_qubits_to_photons(num_multiplexing,num_photons)
     elif assignment_type == 5:
         assignment = HGP_diagonal_assign_qubits_to_photons(
             num_multiplexing=num_multiplexing,HGP_code=code)
@@ -376,10 +376,10 @@ def save_results_with_DFLE(
     num_DFlist = []
     num_nonDFLElist = []
     
-    for i in res:
-        num_DFlist.append(i[2])
-        num_nonDFLElist.append(i[3])
-        failure_reasonlist.append((i[2],i[3]))
+    for simulation in res:
+        num_DFlist.append(simulation[2])   # the number of decoder failures
+        num_nonDFLElist.append(simulation[3])   # the number of non-decoder failures giving a logical error
+        failure_reasonlist.append((simulation[2],simulation[3]))
         
     results_dictionary = {
         "Code_length": code.num_qubits,
@@ -408,6 +408,7 @@ def save_results_with_DFLE(
         "DFrate": DFrates,
         "DFerrors": DFerrors,
         "nonDFLErate": nonDFLErates,
+        "nonDFLEerrors": nonDFLEerrors,
         "assignment": assignment,
         "HGP.Hx": code.Hx.tolist(),
         "HGP.Hz": code.Hx.tolist(),
@@ -504,7 +505,7 @@ def main_with_LE():
         success_rates=success_rates,
         success_errors=success_errors,
         failure_rates=failure_rates,
-        failure_errors=failure_rates,
+        failure_errors=failure_errors,
         DFrates=DFrates,
         DFerrors=DFerrors,
         nonDFLErates=nonDFLErates,
