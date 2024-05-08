@@ -1,0 +1,7 @@
+inputs:
+['../multiplexing_VH_decoder.py', '2', '100000', '1', '0', '101', '3', '../input_matrices/N512_K8_symmetric']
+start simulation
+2024-04-23 17:09:00.004204
+simulation finished
+2024-04-23 17:59:17.699185
+saved the results to ../results/results_HGP_n=512_m=2_r=0.0-1.0_as=3.json
