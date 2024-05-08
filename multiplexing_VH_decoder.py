@@ -309,7 +309,7 @@ def run_decoder_with_assignment_with_DFLE(
     elif assignment_type == 2:
         # Stabilizer assignment
         assignment = photon_assigment_by_stabilizer_support(
-            H=np.concatenate((code.Hz,code.Hx),axis=0),num_stabilizers_per_photon=1)
+            H=np.concatenate((code.Hz,code.Hx),axis=0),num_multiplexing=num_multiplexing)
     elif assignment_type == 3:
         # random with row col constraint
         # Sudoku assignment
