@@ -4,9 +4,9 @@
 #SBATCH --mem=20G
 #SBATCH -c 1
 #SBATCH --ntasks=1
-#SBATCH --job-name=8_10000_1_0_101_4_N512_K8_symmetric
-#SBATCH --output=output_8_10000_1_0_101_4_N512_K8_symmetric.txt
+#SBATCH --job-name=8_100000_0.6_0_61_4_N512_K8_symmetric
+#SBATCH --output=output_8_100000_0.6_0_61_4_N512_K8_symmetric.txt
 
 source /apps/unit/NemotoU/NicholasSoftware/bin/activate
 module load python/3.11.4
-python ../multiplexing_VH_decoder.py 8 10000 1 0 101 4 ../input_matrices/N512_K8_symmetric
+python ../multiplexing_VH_decoder.py 8 100000 0.6 0 61 4 ../input_matrices/N512_K8_symmetric
