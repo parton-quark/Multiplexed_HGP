@@ -14,7 +14,7 @@ from peeling_cluster_decoder import combined_peeling_and_cluster_decoder
 from utilities import generate_erasure_pattern_index_set, generate_random_H_matrix, HGP_code, generate_random_error_index_set_with_erasure_support, index_to_biindex, biindex_to_index
 
 def randomly_assign_qubits_to_photons(num_multiplexing,num_photons):
-    # Random photon assignment strategy
+    # Strategy (i) Random photon assignment strategy
     
     num_qubits = num_multiplexing * num_photons
     qubits = [i for i in range(num_qubits)]
@@ -24,22 +24,6 @@ def randomly_assign_qubits_to_photons(num_multiplexing,num_photons):
         qubits_in_photon = []
         for k in range(num_multiplexing):
             picked_qubit = random.choice(qubits)
-            qubits_in_photon.append(picked_qubit)
-            qubits.remove(picked_qubit)
-        photons.append(qubits_in_photon)    
-    return photons
-
-def deterministically_assign_qubits_to_photons(num_multiplexing,num_photons):
-    # Row-Col photon assignment strategy
-    
-    num_qubits = num_multiplexing * num_photons
-    qubits = [i for i in range(num_qubits)]
-    photons = []
-    
-    for j in range(num_photons):
-        qubits_in_photon = []
-        for k in range(num_multiplexing):
-            picked_qubit = qubits[0]
             qubits_in_photon.append(picked_qubit)
             qubits.remove(picked_qubit)
         photons.append(qubits_in_photon)    
@@ -62,6 +46,7 @@ def deterministically_assign_qubits_to_photons(num_multiplexing,num_photons):
 # A "remainder" photon is also used if the multiplexing number does not divide the number of qubits.
 
 def photon_assigment_by_stabilizer_support(H,num_multiplexing):
+    # Strategy (ii) Stabilizer assignment
     
     # Infer the weight of the rows by looking at the first row in H
     row_weight = np.count_nonzero(H[0])
@@ -165,6 +150,160 @@ def photon_assigment_by_stabilizer_support(H,num_multiplexing):
     return list_of_qubits_per_photon
 
 
+# A function to partion the the qubits in a code into different photons of equal size.
+# Assumes a HGP code and will only assign qubits in different rows/columns together.
+
+def HGP_different_row_and_col_assign_qubits_to_photons(num_multiplexing,num_photons,HGP_code):
+    # Strategy (iii) Sudoku assignment strategy for HGP codes.
+    
+    num_qubits = num_multiplexing * num_photons
+    qubits = [i for i in range(num_qubits)]
+    photons = []
+    photons_biindex = []
+    
+    # Define a number to track the number of times qubits could not be selected in a different row/col.
+    # In these cases, random assignment of qubit in a photon is made.
+    # This is for information purposes only and does not affect the function.
+    number_of_random_assignments = 0
+    
+    if num_qubits != HGP_code.num_qubits:
+        raise Exception("The number of qubits in HGP code does not match, cannot properly assign to photons!")
+        
+    # Assign qubits to photons at random, checking the following conditions hold for EACH qubit in photon:
+    # If qubits are from different blocks (horizontal vs vertical), no problem.
+    # If qubits are from the same block, check they are in a different row and column.
+    # If this condition fails, discard this qubit and try again with another selected at random.
+    # If all valid assignments meeting the above conditions have been exhausted, then assign a qubit at random.
+    for photon_index in range(num_photons):
+        qubits_in_photon = []
+        qubits_biindex_in_photon = []
+        
+        # Create a copy of a the original list of qubits and create a shuffled copy of it.
+        # This is way, qubits can be taken at random and also exhaustively iterated through.
+        shuffled_qubit_list = qubits.copy()
+        random.shuffle(shuffled_qubit_list)
+        
+        # Set the maximum number of iterations; it's possible no remaining qubits satisfy conditions.
+        max_iterations = len(shuffled_qubit_list)
+        current_iteration = 0        
+
+        for multiplex_index in range(num_multiplexing):          
+            # Loop through qubits at random and try to add these to the photon, if possible meeting conditions.
+            # Loop repeats a number of times equal to the multiplexing.
+            while ((len(qubits_in_photon) < num_multiplexing) and (current_iteration < max_iterations)):
+                current_iteration += 1
+                
+                # "Pop" the first element of the shuffled qubit list; shuffled ensures qubit added at random.
+                # Also, popping removes the element from the list, so it is ingnored in subsequent loops.
+                picked_qubit_index = shuffled_qubit_list.pop(0)
+
+                #DEBUG
+                #print("1: picked qubit index:"+str(picked_qubit_index))
+
+                # Infer the biindex of this qubit; it depends on information from the HGP block structure.
+                # There are two cases, depending on the block
+                if picked_qubit_index < HGP_code.num_v_qubits:
+                    # Horizontal case
+                    picked_qubit_biindex = index_to_biindex(
+                        index=picked_qubit_index,num_cols=HGP_code.n2,index_shift=0)
+                else:
+                    # Vertical case
+                    picked_qubit_biindex = index_to_biindex(
+                        index=picked_qubit_index,num_cols=HGP_code.r2,index_shift=HGP_code.num_h_qubits)
+
+                # Assign if first qubit.
+                if len(qubits_in_photon)==0:
+                    qubits_in_photon.append(picked_qubit_index)
+                    qubits_biindex_in_photon.append(picked_qubit_biindex)
+                    qubits.remove(picked_qubit_index)
+
+                else:
+                    conditions_satisfied = True
+                    # Iterate through each of the previously selected qubits and check they satisfy conditions.
+                    for qubit_in_photon_index in range(len(qubits_in_photon)):
+                        prior_qubit_index = qubits_in_photon[qubit_in_photon_index]
+                        prior_qubit_biindex = qubits_biindex_in_photon[qubit_in_photon_index]
+
+                        #DEBUG
+                        #print(" 2. Comparing qubits "+str(picked_qubit_index)+" and "+str(prior_qubit_index))
+                        #print("    Candidates for inclusion in photon "+str(photon_index))
+
+                        # We only need to check the condition for qubits in the same block.
+                        if (((picked_qubit_index<HGP_code.num_h_qubits) and 
+                             (prior_qubit_index<HGP_code.num_h_qubits)) 
+                            or ((picked_qubit_index>=HGP_code.num_h_qubits) and 
+                                (prior_qubit_index>=HGP_code.num_h_qubits))):
+                            # If qubits are in the same row or column, condition is not satisfied.
+                            if ((picked_qubit_biindex[0]==prior_qubit_biindex[0]) or 
+                                (picked_qubit_biindex[1]==prior_qubit_biindex[1])):
+                                conditions_satisfied = False
+                                # DEBUG
+                                #print(" ---> These qubits are in same row or column of same block")
+                                break
+
+                    # Add the new qubit if it satisfies conditions on all previously selected qubits.
+                    if (conditions_satisfied==True):
+                        qubits_in_photon.append(picked_qubit_index)
+                        qubits_biindex_in_photon.append(picked_qubit_biindex)
+                        qubits.remove(picked_qubit_index)
+                            
+            if ((current_iteration==max_iterations) and (len(qubits_in_photon) < num_multiplexing)):
+                # If all remaining qubits have been compared and none satisfy conditions, preceding loop ends.
+                # In this case, default to random assignment for the remaining qubits in this photon.
+                
+                # DEBUG
+                #print(" Photon number "+str(photon_index)+" unable to be constructed meeting conditions.")
+                #print(" Instead, assigning possible remaining qubits to this photon at random.")
+                
+                shuffled_qubit_list = qubits.copy()
+                random.shuffle(shuffled_qubit_list)
+                picked_qubit_index = shuffled_qubit_list.pop()
+
+                if picked_qubit_index < HGP_code.num_v_qubits:
+                    # Horizontal case
+                    picked_qubit_biindex = index_to_biindex(
+                        index=picked_qubit_index,num_cols=HGP_code.n2,index_shift=0)
+                else:
+                    # Vertical case
+                    picked_qubit_biindex = index_to_biindex(
+                        index=picked_qubit_index,num_cols=HGP_code.r2,index_shift=HGP_code.num_h_qubits)
+                
+                qubits_in_photon.append(picked_qubit_index)
+                qubits_biindex_in_photon.append(picked_qubit_biindex)
+                qubits.remove(picked_qubit_index)
+                
+        # DEBUG
+        #print("  3. Qubits in photon number "+str(photon_index)+" (index list and biindex list)")
+        #print(qubits_in_photon)
+        #print(qubits_biindex_in_photon)
+        
+        # Add the qubits in the photon to the list of photons.
+        photons.append(qubits_in_photon)
+        photons_biindex.append(qubits_biindex_in_photon)
+        
+    # DEBUG
+    # print("Number of times defaulted to random assignment: "+str(number_of_random_assignments))
+    
+    return photons #, photons_biindex
+
+
+def deterministically_assign_qubits_to_photons(num_multiplexing,num_photons):
+    # Strategy (iv) Row-Col photon assignment strategy
+    
+    num_qubits = num_multiplexing * num_photons
+    qubits = [i for i in range(num_qubits)]
+    photons = []
+    
+    for j in range(num_photons):
+        qubits_in_photon = []
+        for k in range(num_multiplexing):
+            picked_qubit = qubits[0]
+            qubits_in_photon.append(picked_qubit)
+            qubits.remove(picked_qubit)
+        photons.append(qubits_in_photon)    
+    return photons
+
+
 # Function to take a rectangle of size height x width and construct an ordering on the cells in this rectangle.
 # Height and width are assumed to be whole numbers, and the rectangle is visualized as a grid.
 # Each cell in this grid enumerated with a coordinate (i,j), starting with the top left corner as (0,0).
@@ -231,7 +370,7 @@ def compute_rectangle_cells_bijection(height,width):
 # Allows for a "remainder" photon with fewer qubits if this number is not a divisor of the number of qubits.
 
 def HGP_diagonal_assign_qubits_to_photons(num_multiplexing,HGP_code):
-    # Diagonal photon assignment strategy for HGP codes.
+    # Strategy (v) Diagonal photon assignment strategy for HGP codes.
     
     # Infer the number of photons from the number of qubits and the number of multiplexing.
     # If it is not a clean divisor, include an additional remainder qubit.
@@ -279,3 +418,4 @@ def HGP_diagonal_assign_qubits_to_photons(num_multiplexing,HGP_code):
         
     # This is the final list of qubits assigned per photon that is returned.
     return photons
+
