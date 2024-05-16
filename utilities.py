@@ -1,3 +1,6 @@
+# This code is taken from the following paper and its GitHub repository (https://github.com/Nicholas-Connolly/Pruned-Peeling-and-VH-Decoder) with permission from the authors.
+# N. Connolly, V. Londe, A. Leverrier, and N. Delfosse. (2022). Fast erasure decoder for a class of quantum LDPC codes. arXiv preprint arXiv:2208.01002.
+
 import numpy as np
 import random
 from itertools import chain, combinations
