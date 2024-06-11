@@ -45,25 +45,26 @@ def make_shellscript(inputs):
 #make_shellscript(inputs)
 
 
-for assignment_number in [0,1,2,3,4]:
-    num_multiplexing = 16
-    num_trials = 100000
-    max_erasure_rate = 1
-    min_erasure_rate = 0
-    num_steps = 101
-    assignment_type = assignment_number
-    input_matrices_foldername = '../input_matrices/'
-    input_matrices_filename = 'N1280_K290'
+for multiplexing_number in [2,4,8,16]:
+    for assignment_number in [1,2,3,4,5]:
+        num_multiplexing = multiplexing_number
+        num_trials = 100000
+        max_erasure_rate = 0.6
+        min_erasure_rate = 0
+        num_steps = 61
+        assignment_type = assignment_number
+        input_matrices_foldername = '../input_matrices/'
+        input_matrices_filename = 'N512_K8_symmetric'
 
-    inputs2 = [num_multiplexing, 
-        num_trials,
-        max_erasure_rate,
-        min_erasure_rate,
-        num_steps,
-        assignment_type,
-        input_matrices_foldername,
-        input_matrices_filename]
+        inputs2 = [num_multiplexing, 
+            num_trials,
+            max_erasure_rate,
+            min_erasure_rate,
+            num_steps,
+            assignment_type,
+            input_matrices_foldername,
+            input_matrices_filename]
 
-    #make_shellscript(inputs2)
+        #make_shellscript(inputs2)
 
 
