@@ -1,7 +1,0 @@
-inputs:
-['../multiplexing_VH_decoder.py', '8', '100000', '1', '0', '101', '1', '../input_matrices/N320_K82']
-start simulation
-2024-04-23 17:13:56.080707
-simulation finished
-2024-04-25 19:23:41.234587
-saved the results to ../results/results_HGP_n=320_m=8_r=0.0-1.0_as=1.json
