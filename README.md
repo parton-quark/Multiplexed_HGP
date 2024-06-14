@@ -18,7 +18,7 @@ Simulation flows are in [this jupyter notebook](https://github.com/parton-quark/
 - itertools 
 
 ## Citation 
-ArXiv submission is available at [HERE]([To be updated](https://arxiv.org/abs/2406.08832)). For the citation of this work, please use this bibtex file.
+ArXiv submission is available at [HERE](https://arxiv.org/abs/2406.08832). For the citation of this work, please use this bibtex file.
 
 ```
 @misc{nishio2024multiplexed,
