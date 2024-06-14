@@ -18,6 +18,17 @@ Simulation flows are in [this jupyter notebook](https://github.com/parton-quark/
 - itertools 
 
 ## Citation 
-ArXiv submission is available at [HERE](To be updated). For the citation of this work, please use this bibtex file.
+ArXiv submission is available at [HERE]([To be updated](https://arxiv.org/abs/2406.08832)). For the citation of this work, please use this bibtex file.
+
+```
+@misc{nishio2024multiplexed,
+      title={Multiplexed Quantum Communication with Surface and Hypergraph Product Codes}, 
+      author={Shin Nishio and Nicholas Connolly and Nicolò Lo Piparo and William John Munro and Thomas Rowan Scruby and Kae Nemoto},
+      year={2024},
+      eprint={2406.08832},
+      archivePrefix={arXiv},
+      primaryClass={id='quant-ph' full_name='Quantum Physics' is_active=True alt_name=None in_archive='quant-ph' is_general=False description=None}
+}
+```
 
 If you have any question on this implementation, send email to parton(at)nii.ac.jp (Shin Nishio).
